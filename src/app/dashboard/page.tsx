@@ -4,6 +4,8 @@ import { getDashboard } from "@/lib/data";
 import { formatMoney, formatPercent } from "@/lib/utils";
 import { ArrowUpRight, Coins, Gift, GraduationCap, MapPinned, Users } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export default async function DashboardPage() {
     const data = await getDashboard();
     const cards = [

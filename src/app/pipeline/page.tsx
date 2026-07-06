@@ -4,6 +4,8 @@ import { CrmShell } from "@/components/crm-shell";
 import { PipelineBoard } from "@/components/pipeline-board";
 import { readSheet } from "@/lib/excel-store";
 
+export const dynamic = "force-dynamic";
+
 export default async function PipelinePage() {
     const rows = await readSheet("chuongtrinh");
 

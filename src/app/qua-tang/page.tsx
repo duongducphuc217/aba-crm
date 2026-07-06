@@ -3,6 +3,8 @@ import { SheetCrud } from "@/components/sheet-crud";
 import { readSheet } from "@/lib/excel-store";
 import { SHEETS } from "@/lib/types";
 
+export const dynamic = "force-dynamic";
+
 export default async function GiftsPage() {
     const rows = await readSheet("quatrian");
     return (

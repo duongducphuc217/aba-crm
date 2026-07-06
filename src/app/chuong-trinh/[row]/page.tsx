@@ -5,6 +5,8 @@ import { Card, Badge } from "@/components/ui";
 import { readSheet } from "@/lib/excel-store";
 import { formatMoney, formatNumber } from "@/lib/utils";
 
+export const dynamic = "force-dynamic";
+
 function s(v: unknown) {
     return v == null ? "" : String(v).trim();
 }
