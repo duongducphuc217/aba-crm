@@ -359,21 +359,21 @@ ${JSON.stringify(crmContextData, null, 2)}`;
                             {/* Prompt helper links */}
                             <div className="space-y-2 pt-2 border-t border-slate-100">
                                 <button
-                                    onClick={() => sendMessage("Dựa trên toàn bộ dữ liệu CRM, hãy tìm các khách hàng có khả năng chốt cao nhất và giải thích lý do.")}
+                                    onClick={() => sendMessage("Hãy viết một mẫu tin nhắn SMS/Zalo ngắn gọn, ấm áp để gửi chúc mừng sinh nhật hoặc chúc mừng ngày nhà giáo Việt Nam tới đầu mối liên hệ chính của một trường học trong danh sách CRM.")}
                                     disabled={loadingChat}
                                     className="w-full text-left bg-indigo-50/50 hover:bg-indigo-50 border border-indigo-100 text-indigo-700 font-bold px-3 py-2 rounded-xl text-xs cursor-pointer transition text-ellipsis overflow-hidden whitespace-nowrap block"
                                 >
-                                    Tìm KH có khả năng chốt cao
+                                    Viết tin nhắn chúc mừng
                                 </button>
                                 <button
-                                    onClick={() => sendMessage("Phân tích khách hàng nào nên ưu tiên chăm sóc hôm nay và đề xuất hành động tiếp theo.")}
+                                    onClick={() => sendMessage("Hãy viết một bài đăng truyền thông hấp dẫn cho Fanpage hoặc Zalo để giới thiệu về chương trình giảng dạy của ABA, hướng tới các đối tượng hiệu trưởng và thầy cô giáo trường học.")}
                                     disabled={loadingChat}
                                     className="w-full text-left bg-indigo-50/50 hover:bg-indigo-50 border border-indigo-100 text-indigo-700 font-bold px-3 py-2 rounded-xl text-xs cursor-pointer transition text-ellipsis overflow-hidden whitespace-nowrap block"
                                 >
-                                    Ưu tiên khách cần chăm sóc
+                                    Viết bài fanpage / zalo
                                 </button>
                                 <button
-                                    onClick={() => sendMessage("Hãy thiết kế 1 kịch bản gọi điện tư vấn chi tiết cho một trường Tiểu học đang ở trạng thái 'Đang tư vấn'.")}
+                                    onClick={() => sendMessage("Hãy thiết kế một kịch bản gọi điện (telesales script) tư vấn chi tiết cho nhân viên sale của ABA khi gọi điện giới thiệu chương trình tới một trường học.")}
                                     disabled={loadingChat}
                                     className="w-full text-left bg-indigo-50/50 hover:bg-indigo-50 border border-indigo-100 text-indigo-700 font-bold px-3 py-2 rounded-xl text-xs cursor-pointer transition text-ellipsis overflow-hidden whitespace-nowrap block"
                                 >
