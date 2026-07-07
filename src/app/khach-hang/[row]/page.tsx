@@ -101,36 +101,18 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
                         )}
                     </div>
 
-                    <div className="space-y-4">
-                        {/* Row 1: 4 items */}
-                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                            {row1Items.map((item) => (
-                                <div key={item.label} className="flex items-start gap-3 rounded-xl border border-slate-100 bg-slate-50 p-3">
-                                    <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-white text-slate-500 shadow-sm">
-                                        <item.icon size={16} />
-                                    </div>
-                                    <div className="min-w-0">
-                                        <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">{item.label}</div>
-                                        <div className="mt-0.5 truncate text-sm font-semibold text-slate-800">{item.value || "—"}</div>
-                                    </div>
+                    <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-4">
+                        {[...row1Items, ...row2Items].map((item) => (
+                            <div key={item.label} className="flex items-center gap-2 rounded-xl border border-slate-100 bg-slate-50 p-2 md:p-3">
+                                <div className="grid h-8 w-8 md:h-9 md:w-9 shrink-0 place-items-center rounded-lg bg-white text-slate-500 shadow-sm">
+                                    <item.icon size={14} className="md:w-4 md:h-4" />
                                 </div>
-                            ))}
-                        </div>
-
-                        {/* Row 2: 4 items */}
-                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                            {row2Items.map((item) => (
-                                <div key={item.label} className="flex items-start gap-3 rounded-xl border border-slate-100 bg-slate-50 p-3">
-                                    <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-white text-slate-500 shadow-sm">
-                                        <item.icon size={16} />
-                                    </div>
-                                    <div className="min-w-0">
-                                        <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">{item.label}</div>
-                                        <div className="mt-0.5 truncate text-sm font-semibold text-slate-800">{item.value || "—"}</div>
-                                    </div>
+                                <div className="min-w-0">
+                                    <div className="text-[10px] md:text-[11px] font-semibold uppercase tracking-wider text-slate-400 truncate">{item.label}</div>
+                                    <div className="mt-0.5 truncate text-xs md:text-sm font-semibold text-slate-800" title={item.value || ""}>{item.value || "—"}</div>
                                 </div>
-                            ))}
-                        </div>
+                            </div>
+                        ))}
                     </div>
                 </Card>
 
