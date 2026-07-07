@@ -194,117 +194,27 @@ Hãy trả lời bằng tiếng Việt một cách cô đọng, chuyên nghiệp
 DƯỚI ĐÂY LÀ DỮ LIỆU CRM HIỆN TẠI (Được xuất thời gian thực từ Google Sheets):
 ${JSON.stringify(crmContextData, null, 2)}`;
 
-            let aiResponseText = "";
+            const res = await fetch("/api/ai/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    provider,
+                    baseUrl,
+                    model,
+                    apiKey,
+                    systemPrompt,
+                    messages,
+                    query: queryText
+                })
+            });
 
-            if (provider === "Gemini") {
-                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-                
-                // Gemini API messages payload mapping
-                const contents = [
-                    {
-                        role: "user",
-                        parts: [{ text: `${systemPrompt}\n\nHãy dựa vào dữ liệu trên để bắt đầu hội thoại.` }]
-                    },
-                    {
-                        role: "model",
-                        parts: [{ text: "Tôi đã hiểu toàn bộ cấu trúc dữ liệu CRM của ABA. Xin mời bạn đặt câu hỏi phân tích." }]
-                    }
-                ];
-
-                // Append history
-                messages.forEach(m => {
-                    contents.push({
-                        role: m.role === "user" ? "user" : "model",
-                        parts: [{ text: m.text }]
-                    });
-                });
-
-                // Append current query
-                contents.push({
-                    role: "user",
-                    parts: [{ text: queryText }]
-                });
-
-                const res = await fetch(endpoint, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ contents })
-                });
-
-                if (!res.ok) {
-                    const errBody = await res.text();
-                    throw new Error(`Google API ${res.status}: ${errBody}`);
-                }
-
-                const data = await res.json();
-                aiResponseText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Không nhận được phản hồi từ Gemini.";
-
-            } else if (provider === "OpenAI-compatible") {
-                const endpoint = `${baseUrl.replace(/\/$/, "")}/chat/completions`;
-                
-                const messagesPayload = [
-                    { role: "system", content: systemPrompt },
-                    ...messages.map(m => ({
-                        role: m.role === "user" ? "user" : "assistant",
-                        content: m.text
-                    })),
-                    { role: "user", content: queryText }
-                ];
-
-                const res = await fetch(endpoint, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${apiKey}`
-                    },
-                    body: JSON.stringify({
-                        model: model,
-                        messages: messagesPayload
-                    })
-                });
-
-                if (!res.ok) {
-                    const errBody = await res.text();
-                    throw new Error(`OpenAI-compatible API ${res.status}: ${errBody}`);
-                }
-
-                const data = await res.json();
-                aiResponseText = data.choices?.[0]?.message?.content || "Không nhận được phản hồi từ OpenAI-compatible API.";
-
-            } else if (provider === "Anthropic-compatible") {
-                const endpoint = `${baseUrl.replace(/\/$/, "")}/messages`;
-                
-                const messagesPayload = [
-                    ...messages.map(m => ({
-                        role: m.role === "user" ? "user" : "assistant",
-                        content: m.text
-                    })),
-                    { role: "user", content: queryText }
-                ];
-
-                const res = await fetch(endpoint, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "x-api-key": apiKey,
-                        "anthropic-version": "2023-06-01"
-                    },
-                    body: JSON.stringify({
-                        model: model,
-                        system: systemPrompt,
-                        messages: messagesPayload,
-                        max_tokens: 4096
-                    })
-                });
-
-                if (!res.ok) {
-                    const errBody = await res.text();
-                    throw new Error(`Anthropic-compatible API ${res.status}: ${errBody}`);
-                }
-
-                const data = await res.json();
-                aiResponseText = data.content?.[0]?.text || "Không nhận được phản hồi từ Anthropic API.";
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                throw new Error(data.error || "Không nhận được phản hồi từ AI server.");
             }
+
+            const data = await res.json();
+            const aiResponseText = data.text;
 
             setMessages(prev => [...prev, { role: "ai", text: aiResponseText }]);
 
