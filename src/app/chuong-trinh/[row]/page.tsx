@@ -64,7 +64,7 @@ export default async function ProgramDetailPage({ params }: { params: Promise<{ 
         { icon: Building2, label: "Tên trường", value: schoolName },
         { icon: Tag, label: "Chương trình", value: programName },
         { icon: MapPin, label: "Khu vực", value: s(program.khu_vuc) },
-        { icon: User, label: "Hiệu trưởng", value: s(program.hieu_truong) },
+        { icon: User, label: "Hiệu trưởng", value: s(program.dau_moi_lien_he) },
         { icon: Phone, label: "Điện thoại", value: s(program.phone) },
         { icon: User, label: "Sale phụ trách", value: s(program.sale) },
         { icon: Calendar, label: "Ngày dự kiến", value: s(program.ngay_du_kien) },
@@ -220,7 +220,7 @@ export default async function ProgramDetailPage({ params }: { params: Promise<{ 
                                         <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Tên quà</th>
                                         <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">SL</th>
                                         <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Đơn giá</th>
-                                        <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Tổng tiền</th>
+                                        <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Thành tiền</th>
                                         <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Trạng thái</th>
                                     </tr>
                                 </thead>

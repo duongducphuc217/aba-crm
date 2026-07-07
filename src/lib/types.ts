@@ -1,4 +1,4 @@
-export type SheetName = "danhsach" | "quatrian" | "chuongtrinh";
+export type SheetName = "danhsach" | "quatrian" | "chuongtrinh" | "taikhoan";
 
 export type RowRecord = Record<string, string | number | null> & {
     _row: number;
@@ -10,16 +10,19 @@ export const SHEETS: Record<SheetName, string[]> = {
         "ten_truong",
         "cap_hoc",
         "khu_vuc",
-        "hieu_truong",
+        "chuc_danh",
+        "dau_moi_lien_he",
         "phone",
         "sale",
         "so_luong_hoc_sinh",
         "muc_do_uu_tien",
+        "dac_diem_khach_hang",
     ],
     quatrian: [
         "ngay_tang",
         "ten_truong",
-        "hieu_truong",
+        "nguoi_nhan",
+        "chuc_danh",
         "sale",
         "ten_qua",
         "so_luong_qua",
@@ -31,7 +34,7 @@ export const SHEETS: Record<SheetName, string[]> = {
     chuongtrinh: [
         "ten_truong",
         "khu_vuc",
-        "hieu_truong",
+        "dau_moi_lien_he",
         "phone",
         "sale",
         "chuong_trinh",
@@ -41,5 +44,13 @@ export const SHEETS: Record<SheetName, string[]> = {
         "ngay_du_kien",
         "status",
         "ghi_chu",
+    ],
+    taikhoan: [
+        "username",
+        "password",
+        "salt",
+        "name",
+        "fullname",
+        "role",
     ],
 };

@@ -21,13 +21,12 @@ export default async function ProgramsPage() {
                 statusCol="status"
                 detailBasePath="/chuong-trinh"
                 displayOrder={[
-                    "ten_truong",
-                    "sale",
                     "chuong_trinh",
+                    "ten_truong",
+                    "ngay_du_kien",
                     "so_luong",
                     "don_gia",
                     "doanh_thu",
-                    "ngay_du_kien",
                     "status",
                 ]}
             />

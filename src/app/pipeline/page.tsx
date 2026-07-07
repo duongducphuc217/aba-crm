@@ -16,7 +16,7 @@ export default async function PipelinePage() {
                     <div>
                         <h2 className="text-2xl font-black tracking-tight text-slate-900">Pipeline chương trình</h2>
                         <p className="mt-1 text-sm text-slate-500">
-                            Kéo thả card chương trình giữa 3 trạng thái: Order mới, Đang trao đổi, Đã chốt. Trạng thái sẽ được lưu lại vào file Excel.
+                            Kéo thả card chương trình giữa 3 trạng thái: Order mới, Đang trao đổi, Đã chốt. Trạng thái sẽ được lưu lại vào Google Sheets.
                         </p>
                     </div>
                     <Link href="/chuong-trinh" className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">

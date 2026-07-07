@@ -1,5 +1,6 @@
 import { GoogleAuth } from "google-auth-library";
 import { SHEETS, type RowRecord, type SheetName } from "./types";
+import { generateSalt, hashPassword } from "./auth-utils";
 
 /**
  * Google Sheets storage layer (REST API + google-auth-library).
@@ -117,6 +118,22 @@ async function ensureHeaders(sheet: SheetName): Promise<string[]> {
             body: JSON.stringify({ values: [SHEETS[sheet]] }),
         }
     );
+
+    // If it's the "taikhoan" sheet, initialize the default admin account
+    if (sheet === "taikhoan") {
+        const dSalt = generateSalt();
+        const dHash = hashPassword("admin123", dSalt);
+        const adminRow = ["admin", dHash, dSalt, "Quản trị viên", "admin"];
+        
+        await apiFetch(
+            `/values/${enc(sheet)}!A2?valueInputOption=USER_ENTERED`,
+            {
+                method: "PUT",
+                body: JSON.stringify({ values: [adminRow] }),
+            }
+        );
+    }
+
     return SHEETS[sheet];
 }
 

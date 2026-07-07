@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, Building2, GraduationCap, Gift, MapPin, Phone, Star, User, Users } from "lucide-react";
+import { ArrowLeft, Building2, GraduationCap, Gift, MapPin, Phone, Star, User, Users, Briefcase } from "lucide-react";
 import { CrmShell } from "@/components/crm-shell";
 import { Card, Badge } from "@/components/ui";
 import { readSheet } from "@/lib/excel-store";
@@ -57,14 +57,17 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
     const totalGiftCost = gifts.reduce((sum, g) => sum + (Number(g.Tong_tien_qua) || 0), 0);
     const totalRevenue = programs.reduce((sum, p) => sum + (Number(p.doanh_thu) || 0), 0);
 
-    const infoItems = [
-        { icon: Building2, label: "Tên trường", value: name },
-        { icon: GraduationCap, label: "Cấp học", value: s(customer.cap_hoc) },
-        { icon: MapPin, label: "Khu vực", value: s(customer.khu_vuc) },
-        { icon: User, label: "Hiệu trưởng", value: s(customer.hieu_truong) },
+    const row1Items = [
+        { icon: Building2, label: "Tên khách hàng", value: name },
+        { icon: User, label: "Đầu mối liên hệ", value: s(customer.dau_moi_lien_he) },
+        { icon: Briefcase, label: "Chức danh", value: s(customer.chuc_danh) },
         { icon: Phone, label: "Điện thoại", value: s(customer.phone) },
-        { icon: Users, label: "Số học sinh", value: fmt(customer.so_luong_hoc_sinh) },
-        { icon: Star, label: "Ưu tiên", value: s(customer.muc_do_uu_tien) },
+    ];
+
+    const row2Items = [
+        { icon: GraduationCap, label: "Cấp học", value: s(customer.cap_hoc) },
+        { icon: Users, label: "Số lượng học sinh", value: fmt(customer.so_luong_hoc_sinh) },
+        { icon: MapPin, label: "Khu vực", value: s(customer.khu_vuc) },
         { icon: User, label: "Sale phụ trách", value: s(customer.sale) },
     ];
 
@@ -91,18 +94,44 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
                         )}
                     </div>
 
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                        {infoItems.map((item) => (
-                            <div key={item.label} className="flex items-start gap-3 rounded-xl border border-slate-100 bg-slate-50 p-3">
-                                <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-white text-slate-500 shadow-sm">
-                                    <item.icon size={16} />
+                    <div className="space-y-4">
+                        {/* Row 1: 4 items */}
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                            {row1Items.map((item) => (
+                                <div key={item.label} className="flex items-start gap-3 rounded-xl border border-slate-100 bg-slate-50 p-3">
+                                    <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-white text-slate-500 shadow-sm">
+                                        <item.icon size={16} />
+                                    </div>
+                                    <div className="min-w-0">
+                                        <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">{item.label}</div>
+                                        <div className="mt-0.5 truncate text-sm font-semibold text-slate-800">{item.value || "—"}</div>
+                                    </div>
                                 </div>
-                                <div className="min-w-0">
-                                    <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">{item.label}</div>
-                                    <div className="mt-0.5 truncate text-sm font-semibold text-slate-800">{item.value || "—"}</div>
+                            ))}
+                        </div>
+
+                        {/* Row 2: 4 items */}
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                            {row2Items.map((item) => (
+                                <div key={item.label} className="flex items-start gap-3 rounded-xl border border-slate-100 bg-slate-50 p-3">
+                                    <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-white text-slate-500 shadow-sm">
+                                        <item.icon size={16} />
+                                    </div>
+                                    <div className="min-w-0">
+                                        <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">{item.label}</div>
+                                        <div className="mt-0.5 truncate text-sm font-semibold text-slate-800">{item.value || "—"}</div>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
+                    </div>
+                </Card>
+
+                {/* ── Customer Characteristics ── */}
+                <Card className="p-6">
+                    <h3 className="text-base font-black text-slate-900 mb-3">Đặc điểm khách hàng</h3>
+                    <div className="text-sm text-slate-600 whitespace-pre-wrap leading-relaxed">
+                        {s(customer.dac_diem_khach_hang) || "Chưa có thông tin đặc điểm khách hàng."}
                     </div>
                 </Card>
 
@@ -177,7 +206,7 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
                                         <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Tên quà</th>
                                         <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Số lượng</th>
                                         <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Đơn giá</th>
-                                        <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Tổng tiền</th>
+                                        <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Thành tiền</th>
                                         <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Dịp tặng</th>
                                         <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Trạng thái</th>
                                     </tr>
