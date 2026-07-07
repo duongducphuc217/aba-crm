@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
                     const updatePayload: Record<string, string> = {
                         password: newHash,
                         salt: newSalt,
-                        role: user.role || "admin"
+                        role: String(user.role || "admin")
                     };
                     if (user.fullname !== undefined) {
                         updatePayload.fullname = String(user.fullname || "Quản trị viên");

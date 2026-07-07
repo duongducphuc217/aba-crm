@@ -293,7 +293,7 @@ export function SheetCrud({ sheet, title, subtitle, addLabel, columns, rows, pri
         setSaving(true);
         setMessage("");
         try {
-            const cleanPayload = (rec: Record<string, string>) => {
+            const cleanPayload = (rec: Record<string, any>) => {
                 const copy = { ...rec };
                 const numericKeys = ["so_luong_qua", "don_gia_qua", "Tong_tien_qua", "so_luong", "don_gia", "doanh_thu"];
                 for (const key of numericKeys) {
@@ -339,7 +339,7 @@ export function SheetCrud({ sheet, title, subtitle, addLabel, columns, rows, pri
 
             // Automate multi-row creation if extraGifts array is populated (only for adding new gifts)
             if (!editing && sheet === "quatrian" && extraGifts.length > 0) {
-                const savedRows = [];
+                const savedRows: RowRecord[] = [];
                 
                 // 1. Save the main entry first
                 const mainRes = await fetch(`/api/sheets/${sheet}`, {
@@ -1213,7 +1213,7 @@ export function SheetCrud({ sheet, title, subtitle, addLabel, columns, rows, pri
                                                     placeholder={columnLabel(col)}
                                                     className="w-full min-h-[80px] px-3 py-2 text-sm rounded-lg border border-slate-200 outline-none transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                                                 />
-                                            ) : col === "status" && sheet === "chuongtrinh" ? (
+                                            ) : col === "status" && (sheet as string) === "chuongtrinh" ? (
                                                 <Select
                                                     value={form[col] ?? ""}
                                                     onChange={(e) => setForm((prev) => ({ ...prev, [col]: e.target.value }))}
@@ -1239,7 +1239,7 @@ export function SheetCrud({ sheet, title, subtitle, addLabel, columns, rows, pri
                                                     placeholder={columnLabel(col)}
                                                     className="disabled:bg-slate-50 disabled:text-slate-500 disabled:cursor-not-allowed font-semibold text-slate-800"
                                                 />
-                                            ) : col === "ten_truong" && sheet === "chuongtrinh" ? (
+                                            ) : col === "ten_truong" && (sheet as string) === "chuongtrinh" ? (
                                                 <div className="relative">
                                                     <Input
                                                         value={form[col] ?? ""}
