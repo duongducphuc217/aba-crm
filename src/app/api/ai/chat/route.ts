@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import fs from "fs";
+import path from "path";
 
 export async function POST(req: NextRequest) {
     try {
@@ -15,6 +17,23 @@ export async function POST(req: NextRequest) {
             }, { status: 400 });
         }
 
+        let baseSystemPrompt = "";
+        try {
+            const promptFilePath = path.join(process.cwd(), "aba-system-prompt.md");
+            if (fs.existsSync(promptFilePath)) {
+                baseSystemPrompt = fs.readFileSync(promptFilePath, "utf-8");
+            }
+        } catch (err) {
+            console.error("Lỗi khi đọc file aba-system-prompt.md:", err);
+        }
+
+        const dataHeaderIndex = systemPrompt.indexOf("DƯỚI ĐÂY LÀ DỮ LIỆU CRM HIỆN TẠI");
+        const crmDataBlock = dataHeaderIndex !== -1 ? systemPrompt.substring(dataHeaderIndex) : "";
+
+        const finalSystemPrompt = baseSystemPrompt 
+            ? `${baseSystemPrompt}\n\n${crmDataBlock}` 
+            : systemPrompt;
+
         let aiText = "";
 
         if (provider === "Gemini") {
@@ -22,7 +41,7 @@ export async function POST(req: NextRequest) {
             const contents = [
                 {
                     role: "user",
-                    parts: [{ text: `${systemPrompt}\n\nHãy dựa vào dữ liệu trên để bắt đầu hội thoại.` }]
+                    parts: [{ text: `${finalSystemPrompt}\n\nHãy dựa vào dữ liệu trên để bắt đầu hội thoại.` }]
                 },
                 {
                     role: "model",
@@ -63,7 +82,7 @@ export async function POST(req: NextRequest) {
             }
             console.log(`[AI Chat API Proxy] Target URL: ${endpoint}, Model: ${model}`);
             const messagesPayload = [
-                { role: "system", content: systemPrompt },
+                { role: "system", content: finalSystemPrompt },
                 ...messages.map((m: any) => ({
                     role: m.role === "user" ? "user" : "assistant",
                     content: m.text
@@ -114,7 +133,7 @@ export async function POST(req: NextRequest) {
                 },
                 body: JSON.stringify({
                     model: model,
-                    system: systemPrompt,
+                    system: finalSystemPrompt,
                     messages: messagesPayload,
                     max_tokens: 4096
                 })
