@@ -13,7 +13,7 @@ const robotoSans = Roboto({
 
 export const metadata: Metadata = {
   title: "CRM Trường học",
-  description: "Dashboard CRM đọc dữ liệu từ Excel",
+  description: "Dashboard CRM đọc dữ liệu từ Google Sheets của Trung tâm ABA",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
