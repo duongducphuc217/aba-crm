@@ -77,6 +77,7 @@ async function apiFetch(path: string, options?: RequestInit) {
     const url = `${BASE}/${SPREADSHEET_ID}${path}`;
     const res = await fetch(url, {
         ...options,
+        cache: "no-store",
         headers: {
             Authorization: `Bearer ${accessToken}`,
             "Content-Type": "application/json",
@@ -96,6 +97,9 @@ function cellToJson(value: unknown): string | number | null {
     if (str === "") return null;
     if (typeof value === "number") return value;
     const normalized = str.replace(/,/g, "");
+    if (normalized.startsWith("0") && normalized.length > 1 && !normalized.startsWith("0.")) {
+        return str;
+    }
     if (/^-?\d+(\.\d+)?$/.test(normalized)) return Number(normalized);
     return str;
 }
@@ -105,6 +109,13 @@ function valueForSheet(column: string, value: unknown): string | number {
     if (NUMERIC_COLUMNS.has(column)) {
         const num = Number(value);
         return Number.isFinite(num) ? num : String(value);
+    }
+    if (column === "phone") {
+        const str = String(value).trim();
+        if (str.startsWith("0")) {
+            return "'" + str;
+        }
+        return str;
     }
     return String(value);
 }
@@ -216,7 +227,16 @@ export async function readSheet(sheet: SheetName): Promise<RowRecord[]> {
         if (rowIsEmpty(values)) continue;
         const record = { _row: i + 1 } as RowRecord;
         columns.forEach((c, idx) => {
-            record[c] = values[idx];
+            let val = values[idx];
+            if (c === "phone" && val != null) {
+                const strVal = String(val).trim();
+                if (/^\d{9}$/.test(strVal)) {
+                    val = "0" + strVal;
+                } else {
+                    val = strVal;
+                }
+            }
+            record[c] = val;
         });
         records.push(record);
     }

@@ -35,6 +35,27 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ sheet: str
         if (!isSheet(sheet)) return NextResponse.json({ error: "Sheet không hợp lệ" }, { status: 400 });
         const body = await req.json();
         const row = await addRow(sheet, body);
+
+        // Auto sync main contact to daumoi tab when creating a customer
+        if (sheet === "danhsach") {
+            const customerId = String(body.MA_KH || "").trim();
+            const contactName = String(body.dau_moi_lien_he || "").trim();
+            if (customerId && contactName) {
+                try {
+                    await addRow("daumoi", {
+                        MA_KH: customerId,
+                        ho_ten: contactName,
+                        chuc_danh: String(body.chuc_danh || "Khác").trim(),
+                        phone: String(body.phone || "").trim(),
+                        ngay_sinh: "",
+                        ghi_chu: "Đầu mối liên hệ chính",
+                    });
+                } catch (contactErr) {
+                    console.error("Lỗi tự động thêm đầu mối liên hệ:", contactErr);
+                }
+            }
+        }
+
         return NextResponse.json({ row }, { status: 201 });
     } catch (error) {
         return apiError(error);

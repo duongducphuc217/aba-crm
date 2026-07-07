@@ -911,8 +911,18 @@ export function SheetCrud({ sheet, title, subtitle, addLabel, columns, rows, pri
                                                 <Input
                                                     value={form.chuc_danh ?? ""}
                                                     onChange={(e) => setForm((prev) => ({ ...prev, chuc_danh: e.target.value }))}
-                                                    placeholder="Chức danh"
+                                                    placeholder="Nhập hoặc chọn chức danh..."
+                                                    list="chuc-danh-suggestions"
                                                 />
+                                                <datalist id="chuc-danh-suggestions">
+                                                    <option value="Hiệu Trưởng" />
+                                                    <option value="Hiệu Phó" />
+                                                    <option value="Tổng Phụ Trách" />
+                                                    <option value="Bí Thư Đoàn" />
+                                                    <option value="Giáo Viên" />
+                                                    <option value="Kế Toán" />
+                                                    <option value="Khác" />
+                                                </datalist>
                                             </div>
                                             {/* Tên quà */}
                                             <div className="flex flex-col gap-1">
@@ -988,7 +998,8 @@ export function SheetCrud({ sheet, title, subtitle, addLabel, columns, rows, pri
                                                             <Input
                                                                 value={gift.chuc_danh}
                                                                 onChange={(e) => updateExtraGift(index, "chuc_danh", e.target.value)}
-                                                                placeholder="Chức danh"
+                                                                placeholder="Nhập hoặc chọn chức danh..."
+                                                                list="chuc-danh-suggestions"
                                                             />
                                                         </div>
                                                         <div className="flex flex-col gap-1">
@@ -1349,6 +1360,13 @@ export function SheetCrud({ sheet, title, subtitle, addLabel, columns, rows, pri
                                                         </div>
                                                     )}
                                                 </div>
+                                            ) : col === "chuc_danh" ? (
+                                                <Input
+                                                    value={form[col] ?? ""}
+                                                    onChange={(e) => setForm((prev) => ({ ...prev, [col]: e.target.value }))}
+                                                    placeholder="Nhập hoặc chọn chức danh..."
+                                                    list="chuc-danh-suggestions"
+                                                />
                                             ) : (
                                                 <Input
                                                     value={form[col] ?? ""}
@@ -1438,6 +1456,16 @@ export function SheetCrud({ sheet, title, subtitle, addLabel, columns, rows, pri
                     </div>
                 </div>
             )}
+            {/* Global datalist for chuc_danh autocompletion suggestions */}
+            <datalist id="chuc-danh-suggestions">
+                <option value="Hiệu Trưởng" />
+                <option value="Hiệu Phó" />
+                <option value="Tổng Phụ Trách" />
+                <option value="Bí Thư Đoàn" />
+                <option value="Giáo Viên" />
+                <option value="Kế Toán" />
+                <option value="Khác" />
+            </datalist>
         </div>
     );
 }

@@ -2,9 +2,18 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { User, Phone, Briefcase, FileText, Plus, Pencil, Trash2, Loader2, X } from "lucide-react";
+import { User, Phone, Briefcase, FileText, Plus, Pencil, Trash2, Loader2, X, Calendar } from "lucide-react";
 import { Card, Button, Input, Select } from "@/components/ui";
 import type { RowRecord } from "@/lib/types";
+
+function formatDate(dateStr: string) {
+    if (!dateStr) return "";
+    const m = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (m) {
+        return `${m[3]}/${m[2]}/${m[1]}`;
+    }
+    return dateStr;
+}
 
 interface ContactsManagerProps {
     contacts: RowRecord[];
@@ -17,11 +26,13 @@ export function ContactsManager({ contacts, customerId }: ContactsManagerProps) 
     const [editingContact, setEditingContact] = useState<RowRecord | null>(null);
     const [loading, setLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState("");
+    const [deletingRow, setDeletingRow] = useState<number | null>(null);
 
     const [form, setForm] = useState({
         ho_ten: "",
-        chuc_danh: "Hiệu trưởng",
+        chuc_danh: "Hiệu Trưởng",
         phone: "",
+        ngay_sinh: "",
         ghi_chu: "",
     });
 
@@ -29,8 +40,9 @@ export function ContactsManager({ contacts, customerId }: ContactsManagerProps) 
         setEditingContact(null);
         setForm({
             ho_ten: "",
-            chuc_danh: "Hiệu trưởng",
+            chuc_danh: "Hiệu Trưởng",
             phone: "",
+            ngay_sinh: "",
             ghi_chu: "",
         });
         setErrorMsg("");
@@ -41,8 +53,9 @@ export function ContactsManager({ contacts, customerId }: ContactsManagerProps) 
         setEditingContact(contact);
         setForm({
             ho_ten: String(contact.ho_ten || ""),
-            chuc_danh: String(contact.chuc_danh || "Hiệu trưởng"),
+            chuc_danh: String(contact.chuc_danh || "Hiệu Trưởng"),
             phone: String(contact.phone || ""),
+            ngay_sinh: String(contact.ngay_sinh || ""),
             ghi_chu: String(contact.ghi_chu || ""),
         });
         setErrorMsg("");
@@ -92,8 +105,6 @@ export function ContactsManager({ contacts, customerId }: ContactsManagerProps) 
     }
 
     async function handleDelete(contact: RowRecord) {
-        if (!confirm(`Bạn có chắc chắn muốn xóa đầu mối ${contact.ho_ten}?`)) return;
-
         setLoading(true);
         try {
             const res = await fetch(`/api/sheets/daumoi?row=${contact._row}`, {
@@ -120,9 +131,10 @@ export function ContactsManager({ contacts, customerId }: ContactsManagerProps) 
                 </div>
                 <Button
                     onClick={openAdd}
-                    className="h-9 gap-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 px-3 cursor-pointer rounded-lg font-semibold"
+                    className="h-8 sm:h-9 gap-1 sm:gap-1.5 bg-indigo-600 !text-white hover:bg-indigo-700 active:bg-indigo-800 px-2 sm:px-3 cursor-pointer rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold shadow-sm transition-all duration-150 shrink-0"
                 >
-                    <Plus size={15} /> Thêm đầu mối
+                    <Plus size={14} className="sm:w-[15px] sm:h-[15px]" />
+                    <span className="hidden sm:inline">Thêm đầu mối</span>
                 </Button>
             </div>
 
@@ -134,45 +146,80 @@ export function ContactsManager({ contacts, customerId }: ContactsManagerProps) 
             ) : (
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
                     {contacts.map((contact) => (
-                        <div key={contact._row} className="relative group rounded-xl border border-slate-100 bg-slate-50 p-3 flex flex-col justify-between min-h-[100px]">
-                            {/* Actions overlay */}
-                            <div className="absolute top-2 right-2 flex items-center gap-1 opacity-60 group-hover:opacity-100 transition">
-                                <button
-                                    onClick={() => openEdit(contact)}
-                                    className="p-1 hover:bg-white rounded hover:shadow-sm text-slate-500 hover:text-indigo-600 cursor-pointer"
-                                    title="Sửa"
-                                >
-                                    <Pencil size={13} />
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(contact)}
-                                    className="p-1 hover:bg-white rounded hover:shadow-sm text-slate-500 hover:text-red-600 cursor-pointer"
-                                    title="Xóa"
-                                >
-                                    <Trash2 size={13} />
-                                </button>
-                            </div>
-
-                            <div className="min-w-0 pr-12">
-                                <div className="flex items-center gap-1.5">
-                                    <span className="text-sm font-semibold text-slate-800 truncate">{contact.ho_ten}</span>
-                                    <span className="inline-block shrink-0 px-1.5 py-0.5 text-[10px] font-semibold bg-indigo-50 text-indigo-700 rounded-md border border-indigo-100">
+                        <div key={contact._row} className="rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 p-3.5 transition-colors duration-150 flex flex-col gap-2.5">
+                            {/* Top row: Name & Badge + Actions */}
+                            <div className="flex items-center justify-between gap-2 border-b border-slate-100/80 pb-2">
+                                <div className="flex items-center gap-2 min-w-0">
+                                    <span className="text-sm font-bold text-slate-800 truncate">{contact.ho_ten}</span>
+                                    <span className="inline-block shrink-0 px-1.5 py-0.5 text-[10px] font-semibold bg-indigo-50 text-indigo-700 rounded-md border border-indigo-100/50">
                                         {contact.chuc_danh}
                                     </span>
                                 </div>
-                                <div className="mt-2 flex items-center gap-1.5 text-xs text-slate-600">
-                                    <Phone size={13} className="text-slate-400" />
-                                    <a href={`tel:${contact.phone}`} className="hover:underline hover:text-indigo-600 font-medium">
+                                <div className="flex items-center gap-1.5 shrink-0">
+                                    {deletingRow === Number(contact._row) ? (
+                                        <div className="flex items-center gap-1">
+                                            <button
+                                                onClick={() => setDeletingRow(null)}
+                                                className="px-2 py-0.5 text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-md cursor-pointer transition-colors"
+                                                title="Hủy"
+                                            >
+                                                Hủy
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    handleDelete(contact);
+                                                    setDeletingRow(null);
+                                                }}
+                                                className="px-2 py-0.5 text-[10px] font-bold bg-red-600 hover:bg-red-700 text-white rounded-md cursor-pointer transition-colors shadow-sm"
+                                                title="Xác nhận xóa"
+                                            >
+                                                Xóa
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <button
+                                                onClick={() => openEdit(contact)}
+                                                className="p-1 hover:bg-white rounded hover:shadow-sm text-slate-400 hover:text-indigo-600 cursor-pointer transition-colors"
+                                                title="Sửa"
+                                            >
+                                                <Pencil size={13} />
+                                            </button>
+                                            <button
+                                                onClick={() => setDeletingRow(Number(contact._row))}
+                                                className="p-1 hover:bg-white rounded hover:shadow-sm text-slate-400 hover:text-red-600 cursor-pointer transition-colors"
+                                                title="Xóa"
+                                            >
+                                                <Trash2 size={13} />
+                                            </button>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Info row */}
+                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
+                                <div className="flex items-center gap-1.5 text-slate-600">
+                                    <Phone size={13} className="text-slate-400 shrink-0" />
+                                    <a href={`tel:${contact.phone}`} className="hover:underline hover:text-indigo-600 font-semibold">
                                         {contact.phone}
                                     </a>
                                 </div>
-                                {contact.ghi_chu && (
-                                    <div className="mt-1.5 flex items-start gap-1.5 text-xs text-slate-500 bg-white p-1.5 rounded border border-slate-100 leading-relaxed whitespace-pre-wrap">
-                                        <FileText size={13} className="text-slate-300 shrink-0 mt-0.5" />
-                                        <span>{contact.ghi_chu}</span>
+                                {contact.ngay_sinh && (
+                                    <div className="flex items-center gap-1.5 text-slate-500">
+                                        <Calendar size={13} className="text-slate-400 shrink-0" />
+                                        <span>Sinh nhật: <strong className="text-slate-700">{formatDate(String(contact.ngay_sinh))}</strong></span>
                                     </div>
                                 )}
                             </div>
+
+                            {/* Ghi chú */}
+                            {contact.ghi_chu && (
+                                <div className="flex items-start gap-1.5 text-xs text-slate-500 bg-white/70 p-2 rounded-lg border border-slate-100 leading-relaxed whitespace-pre-wrap">
+                                    <FileText size={13} className="text-slate-400 shrink-0 mt-0.5" />
+                                    <span>{contact.ghi_chu}</span>
+                                </div>
+                            )}
                         </div>
                     ))}
                 </div>
@@ -201,33 +248,40 @@ export function ContactsManager({ contacts, customerId }: ContactsManagerProps) 
                                 </div>
                             )}
 
-                            <div className="flex flex-col gap-1.5">
-                                <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Họ và tên</label>
-                                <Input
-                                    value={form.ho_ten}
-                                    onChange={(e) => setForm(prev => ({ ...prev, ho_ten: e.target.value }))}
-                                    placeholder="Nguyễn Văn A"
-                                    required
-                                    disabled={loading}
-                                />
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Họ và tên</label>
+                                    <Input
+                                        value={form.ho_ten}
+                                        onChange={(e) => setForm(prev => ({ ...prev, ho_ten: e.target.value }))}
+                                        placeholder="Nguyễn Văn A"
+                                        required
+                                        disabled={loading}
+                                    />
+                                </div>
+
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Chức danh</label>
+                                    <Input
+                                        value={form.chuc_danh}
+                                        onChange={(e) => setForm(prev => ({ ...prev, chuc_danh: e.target.value }))}
+                                        placeholder="Nhập hoặc chọn chức danh..."
+                                        list="chuc-danh-suggestions"
+                                        disabled={loading}
+                                    />
+                                    <datalist id="chuc-danh-suggestions">
+                                        <option value="Hiệu Trưởng" />
+                                        <option value="Hiệu Phó" />
+                                        <option value="Tổng Phụ Trách" />
+                                        <option value="Bí Thư Đoàn" />
+                                        <option value="Giáo Viên" />
+                                        <option value="Kế Toán" />
+                                        <option value="Khác" />
+                                    </datalist>
+                                </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-3">
-                                <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Chức danh</label>
-                                    <Select
-                                        value={form.chuc_danh}
-                                        onChange={(e) => setForm(prev => ({ ...prev, chuc_danh: e.target.value }))}
-                                        disabled={loading}
-                                    >
-                                        <option value="Hiệu trưởng">Hiệu trưởng</option>
-                                        <option value="Hiệu phó">Hiệu phó</option>
-                                        <option value="Tổng phụ trách">Tổng phụ trách</option>
-                                        <option value="Chủ tịch công đoàn">Chủ tịch công đoàn</option>
-                                        <option value="Cán bộ phụ trách">Cán bộ phụ trách</option>
-                                        <option value="Khác">Khác</option>
-                                    </Select>
-                                </div>
                                 <div className="flex flex-col gap-1.5">
                                     <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Số điện thoại</label>
                                     <Input
@@ -236,6 +290,16 @@ export function ContactsManager({ contacts, customerId }: ContactsManagerProps) 
                                         onChange={(e) => setForm(prev => ({ ...prev, phone: e.target.value }))}
                                         placeholder="0987xxxxxx"
                                         required
+                                        disabled={loading}
+                                    />
+                                </div>
+
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Ngày sinh</label>
+                                    <Input
+                                        type="date"
+                                        value={form.ngay_sinh}
+                                        onChange={(e) => setForm(prev => ({ ...prev, ngay_sinh: e.target.value }))}
                                         disabled={loading}
                                     />
                                 </div>

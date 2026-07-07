@@ -61,6 +61,7 @@ export const SHEETS: Record<SheetName, string[]> = {
         "ho_ten",
         "chuc_danh",
         "phone",
+        "ngay_sinh",
         "ghi_chu",
         "ngay_cap_nhat",
     ],

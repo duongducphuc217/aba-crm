@@ -11,10 +11,11 @@ const nav = [
     ["Quà tặng Tri ân", "/qua-tang", Gift],
     ["Chương trình", "/chuong-trinh", GraduationCap],
     ["Pipeline", "/pipeline", Columns3],
+    ["ABA AI", "/aba-ai", Sparkles],
 ] as const;
 
 function isActive(label: string, title: string) {
-    return label.includes(title.replace("Quản lý ", "")) || (title.includes("Dashboard") && label.includes("Dashboard")) || (title.includes("Quà") && label.includes("Quà")) || (title.includes("Chương") && label.includes("Chương")) || (title.includes("Pipeline") && label.includes("Pipeline"));
+    return label === title || label.includes(title.replace("Quản lý ", "")) || (title.includes("Dashboard") && label.includes("Dashboard")) || (title.includes("Quà") && label.includes("Quà")) || (title.includes("Chương") && label.includes("Chương")) || (title.includes("Pipeline") && label.includes("Pipeline")) || (title.includes("ABA AI") && label.includes("ABA AI"));
 }
 
 export function CrmShell({ children, title = "Dashboard Báo cáo" }: { children: React.ReactNode; title?: string }) {

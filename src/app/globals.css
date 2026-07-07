@@ -64,3 +64,8 @@ select {
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
+/* Hide default datalist dropdown arrow indicator in Webkit browsers */
+input[list]::-webkit-calendar-picker-indicator {
+  display: none !important;
+}

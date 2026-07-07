@@ -82,9 +82,9 @@ export default async function ProgramDetailPage({ params }: { params: Promise<{ 
                     </Link>
                     <Link
                         href={`/chuong-trinh?edit=${rowNum}`}
-                        className="inline-flex items-center gap-2 shrink-0 bg-indigo-600 px-4 py-2 rounded-lg text-sm font-semibold !text-white shadow-sm shadow-indigo-200 hover:bg-indigo-700 active:bg-indigo-800 cursor-pointer"
+                        className="inline-flex items-center gap-1 sm:gap-2 shrink-0 bg-indigo-600 h-8 sm:h-10 px-2.5 sm:px-4 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold !text-white shadow-sm shadow-indigo-200 hover:bg-indigo-700 active:bg-indigo-800 cursor-pointer"
                     >
-                        <Pencil size={16} /> Sửa chương trình
+                        <Pencil size={14} className="sm:w-4 sm:h-4" /> Sửa chương trình
                     </Link>
                 </div>
 
@@ -112,7 +112,15 @@ export default async function ProgramDetailPage({ params }: { params: Promise<{ 
                                 </div>
                                 <div className="min-w-0">
                                     <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">{item.label}</div>
-                                    <div className="mt-0.5 truncate text-sm font-semibold text-slate-800">{item.value || "—"}</div>
+                                    <div className="mt-0.5 truncate text-sm font-semibold text-slate-800">
+                                        {item.label === "Điện thoại" && item.value ? (
+                                            <a href={`tel:${item.value}`} className="hover:underline hover:text-indigo-600">
+                                                {item.value}
+                                            </a>
+                                        ) : (
+                                            item.value || "—"
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         ))}
