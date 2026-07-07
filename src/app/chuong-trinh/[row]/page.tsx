@@ -82,7 +82,7 @@ export default async function ProgramDetailPage({ params }: { params: Promise<{ 
                     </Link>
                     <Link
                         href={`/chuong-trinh?edit=${rowNum}`}
-                        className="inline-flex items-center gap-2 shrink-0 bg-indigo-600 px-4 py-2 rounded-lg text-sm font-semibold text-white shadow-sm shadow-indigo-200 hover:bg-indigo-700 active:bg-indigo-800 cursor-pointer"
+                        className="inline-flex items-center gap-2 shrink-0 bg-indigo-600 px-4 py-2 rounded-lg text-sm font-semibold !text-white shadow-sm shadow-indigo-200 hover:bg-indigo-700 active:bg-indigo-800 cursor-pointer"
                     >
                         <Pencil size={16} /> Sửa chương trình
                     </Link>
