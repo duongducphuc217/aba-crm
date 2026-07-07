@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
 
             if (!res.ok) {
                 const err = await res.text();
-                throw new Error(`Gemini API Error: ${err}`);
+                throw new Error(`Gemini API Error ${res.status}: ${err || "Không có phản hồi chi tiết"}`);
             }
 
             const data = await res.json();
@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
 
             if (!res.ok) {
                 const err = await res.text();
-                throw new Error(`OpenAI API Error: ${err}`);
+                throw new Error(`OpenAI API Error ${res.status}: ${err || "Không có phản hồi chi tiết"}`);
             }
 
             const data = await res.json();
@@ -108,7 +108,7 @@ export async function POST(req: NextRequest) {
 
             if (!res.ok) {
                 const err = await res.text();
-                throw new Error(`Anthropic API Error: ${err}`);
+                throw new Error(`Anthropic API Error ${res.status}: ${err || "Không có phản hồi chi tiết"}`);
             }
 
             const data = await res.json();
