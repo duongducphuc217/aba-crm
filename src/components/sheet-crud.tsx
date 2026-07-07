@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Badge, Button, Card, Input, Select } from "@/components/ui";
 import type { RowRecord, SheetName } from "@/lib/types";
@@ -93,8 +93,24 @@ function formatCellValue(column: string, value: unknown) {
 
 export function SheetCrud({ sheet, title, subtitle, addLabel, columns, rows, primaryCol, statusCol, displayOrder, detailBasePath }: Props) {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [items, setItems] = useState(rows);
     const [editing, setEditing] = useState<RowRecord | null>(null);
+
+    useEffect(() => {
+        const editRowStr = searchParams.get("edit");
+        if (editRowStr) {
+            const editRowNum = parseInt(editRowStr, 10);
+            const found = items.find(r => r._row === editRowNum);
+            if (found) {
+                openEdit(found);
+            }
+            // Clear the query parameter after opening
+            const url = new URL(window.location.href);
+            url.searchParams.delete("edit");
+            window.history.replaceState({}, "", url.pathname + url.search);
+        }
+    }, [searchParams, items]);
     const [showForm, setShowForm] = useState(false);
     const [form, setForm] = useState<Record<string, string>>(() => emptyRecord(columns));
     const [query, setQuery] = useState("");

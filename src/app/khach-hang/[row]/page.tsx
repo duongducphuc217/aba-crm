@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, Building2, GraduationCap, Gift, MapPin, Phone, Star, User, Users, Briefcase } from "lucide-react";
+import { ArrowLeft, Building2, GraduationCap, Gift, MapPin, Phone, Star, User, Users, Briefcase, Pencil } from "lucide-react";
 import { CrmShell } from "@/components/crm-shell";
 import { Card, Badge } from "@/components/ui";
 import { readSheet } from "@/lib/excel-store";
@@ -75,10 +75,18 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
         <CrmShell title="Chi tiết Khách hàng">
             <div className="space-y-6">
 
-                {/* ── Back link ── */}
-                <Link href="/khach-hang" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-indigo-600">
-                    <ArrowLeft size={16} /> Quay lại danh sách
-                </Link>
+                {/* ── Back link & Actions ── */}
+                <div className="flex items-center justify-between">
+                    <Link href="/khach-hang" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-indigo-600">
+                        <ArrowLeft size={16} /> Quay lại danh sách
+                    </Link>
+                    <Link
+                        href={`/khach-hang?edit=${rowNum}`}
+                        className="inline-flex h-9 items-center gap-2 rounded-xl bg-indigo-600 px-4 text-xs font-bold text-white shadow-sm shadow-indigo-100 transition hover:bg-indigo-700 active:bg-indigo-800"
+                    >
+                        <Pencil size={14} /> Sửa thông tin
+                    </Link>
+                </div>
 
                 {/* ── Customer info ── */}
                 <Card className="p-6">
