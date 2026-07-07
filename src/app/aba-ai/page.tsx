@@ -3,11 +3,39 @@
 import { useEffect, useState, useRef } from "react";
 import { CrmShell } from "@/components/crm-shell";
 import { Badge, Button, Card, Input, Select } from "@/components/ui";
-import { Sparkles, Trash2, Send, Settings, ArrowRight, ExternalLink, AlertCircle, CheckCircle2, Eye, EyeOff } from "lucide-react";
+import { Sparkles, Trash2, Send, Settings, ArrowRight, ExternalLink, AlertCircle, CheckCircle2, Eye, EyeOff, Copy } from "lucide-react";
 
 interface Message {
     role: "user" | "ai";
     text: string;
+}
+
+function CopyButton({ text }: { text: string }) {
+    const [copied, setCopied] = useState(false);
+
+    const handleCopy = async () => {
+        try {
+            await navigator.clipboard.writeText(text);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+            console.error("Lỗi sao chép:", err);
+        }
+    };
+
+    return (
+        <button
+            onClick={handleCopy}
+            className="absolute top-2 right-2 p-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition cursor-pointer opacity-0 group-hover:opacity-100 focus:opacity-100 shadow-sm z-10"
+            title="Sao chép nội dung"
+        >
+            {copied ? (
+                <CheckCircle2 size={13} className="text-emerald-500" />
+            ) : (
+                <Copy size={13} />
+            )}
+        </button>
+    );
 }
 
 export default function AbaAiPage() {
@@ -241,23 +269,40 @@ ${JSON.stringify(crmContextData, null, 2)}`;
         html = html.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
         
         const lines = html.split("\n");
-        return lines.map((line, idx) => {
-            const trimmed = line.trim();
-            if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
-                return (
-                    <li key={idx} className="list-disc ml-5 mt-1 font-medium text-slate-700 leading-relaxed" dangerouslySetInnerHTML={{ __html: trimmed.substring(2) }} />
-                );
-            }
-            if (/^\d+\.\s/.test(trimmed)) {
-                const content = trimmed.replace(/^\d+\.\s/, "");
-                return (
-                    <li key={idx} className="list-decimal ml-5 mt-1 font-medium text-slate-700 leading-relaxed" dangerouslySetInnerHTML={{ __html: content }} />
-                );
-            }
-            return (
-                <p key={idx} className="min-h-[1.25rem] leading-relaxed font-medium text-slate-700 text-sm md:text-[14px]" dangerouslySetInnerHTML={{ __html: line || "&nbsp;" }} />
-            );
-        });
+        return (
+            <div className="space-y-1">
+                {lines.map((line, idx) => {
+                    const trimmed = line.trim();
+                    if (!trimmed) {
+                        return <div key={idx} className="h-1.5" />; // Small compact spacing for empty lines
+                    }
+                    if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
+                        return (
+                            <li key={idx} className="list-disc ml-4 text-slate-700 leading-relaxed font-medium text-sm" dangerouslySetInnerHTML={{ __html: trimmed.substring(2) }} />
+                        );
+                    }
+                    if (/^\d+\.\s/.test(trimmed)) {
+                        const content = trimmed.replace(/^\d+\.\s/, "");
+                        return (
+                            <li key={idx} className="list-decimal ml-4 text-slate-700 leading-relaxed font-medium text-sm" dangerouslySetInnerHTML={{ __html: content }} />
+                        );
+                    }
+                    if (trimmed.startsWith("### ")) {
+                        return (
+                            <h4 key={idx} className="text-sm font-bold text-slate-900 mt-2 mb-1" dangerouslySetInnerHTML={{ __html: trimmed.substring(4) }} />
+                        );
+                    }
+                    if (trimmed.startsWith("## ")) {
+                        return (
+                            <h3 key={idx} className="text-base font-black text-slate-950 mt-3 mb-1.5" dangerouslySetInnerHTML={{ __html: trimmed.substring(3) }} />
+                        );
+                    }
+                    return (
+                        <p key={idx} className="text-slate-700 leading-relaxed font-medium text-sm md:text-[14px]" dangerouslySetInnerHTML={{ __html: line }} />
+                    );
+                })}
+            </div>
+        );
     }
 
     // Toggle provider choice and auto-assign common endpoints/models
@@ -416,12 +461,15 @@ ${JSON.stringify(crmContextData, null, 2)}`;
                                             className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
                                         >
                                             <div 
-                                                className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm shadow-sm leading-relaxed ${
+                                                className={`relative group max-w-[85%] rounded-2xl px-4 py-3 text-sm shadow-sm leading-relaxed ${
                                                     m.role === "user" 
                                                         ? "bg-indigo-600 text-white font-semibold rounded-br-none" 
-                                                        : "bg-white border border-slate-200 text-slate-800 rounded-bl-none font-medium space-y-2"
+                                                        : "bg-white border border-slate-200 text-slate-800 rounded-bl-none font-medium"
                                                 }`}
                                             >
+                                                {m.role === "ai" && (
+                                                    <CopyButton text={m.text} />
+                                                )}
                                                 {m.role === "user" ? (
                                                     <p className="whitespace-pre-wrap">{m.text}</p>
                                                 ) : (
