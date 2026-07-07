@@ -57,7 +57,11 @@ export async function POST(req: NextRequest) {
             aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
         } else if (provider === "OpenAI-compatible") {
-            const endpoint = `${baseUrl.replace(/\/$/, "")}/chat/completions`;
+            let endpoint = baseUrl.trim().replace(/\/$/, "");
+            if (!endpoint.endsWith("/chat/completions")) {
+                endpoint = `${endpoint}/chat/completions`;
+            }
+            console.log(`[AI Chat API Proxy] Target URL: ${endpoint}, Model: ${model}`);
             const messagesPayload = [
                 { role: "system", content: systemPrompt },
                 ...messages.map((m: any) => ({
@@ -88,7 +92,11 @@ export async function POST(req: NextRequest) {
             aiText = data.choices?.[0]?.message?.content || "";
 
         } else if (provider === "Anthropic-compatible") {
-            const endpoint = `${baseUrl.replace(/\/$/, "")}/messages`;
+            let endpoint = baseUrl.trim().replace(/\/$/, "");
+            if (!endpoint.endsWith("/messages")) {
+                endpoint = `${endpoint}/messages`;
+            }
+            console.log(`[AI Chat API Proxy] Target URL: ${endpoint}, Model: ${model}`);
             const messagesPayload = [
                 ...messages.map((m: any) => ({
                     role: m.role === "user" ? "user" : "assistant",

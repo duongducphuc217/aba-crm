@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { CrmShell } from "@/components/crm-shell";
 import { Badge, Button, Card, Input, Select } from "@/components/ui";
-import { Sparkles, Trash2, Send, Settings, ArrowRight, ExternalLink, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Sparkles, Trash2, Send, Settings, ArrowRight, ExternalLink, AlertCircle, CheckCircle2, Eye, EyeOff } from "lucide-react";
 
 interface Message {
     role: "user" | "ai";
@@ -25,6 +25,7 @@ export default function AbaAiPage() {
     const [tempBaseUrl, setTempBaseUrl] = useState("");
     const [tempModel, setTempModel] = useState("gemini-2.5-flash");
     const [tempApiKey, setTempApiKey] = useState("");
+    const [showApiKey, setShowApiKey] = useState(false);
 
     // Chat states
     const [messages, setMessages] = useState<Message[]>([]);
@@ -562,12 +563,22 @@ ${JSON.stringify(crmContextData, null, 2)}`;
                                     {/* API Key */}
                                     <div className="flex flex-col gap-1.5">
                                         <label className="text-xs font-bold uppercase tracking-wider text-slate-400 font-black">API KEY</label>
-                                        <Input
-                                            type="password"
-                                            value={tempApiKey}
-                                            onChange={(e) => setTempApiKey(e.target.value)}
-                                            placeholder="Đã cấu hình - để trống nếu muốn giữ nguyên"
-                                        />
+                                        <div className="relative flex items-center">
+                                            <Input
+                                                type={showApiKey ? "text" : "password"}
+                                                value={tempApiKey}
+                                                onChange={(e) => setTempApiKey(e.target.value)}
+                                                placeholder="Đã cấu hình - để trống nếu muốn giữ nguyên"
+                                                className="pr-10 w-full"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowApiKey(!showApiKey)}
+                                                className="absolute right-3 text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer"
+                                            >
+                                                {showApiKey ? <EyeOff size={16} /> : <Eye size={16} />}
+                                            </button>
+                                        </div>
                                         <span className="text-[10px] text-slate-400 font-semibold">API key đang được lưu bảo mật phía máy chủ/localStorage của bạn.</span>
                                     </div>
 
