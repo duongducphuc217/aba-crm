@@ -17,6 +17,7 @@ export const SHEETS: Record<SheetName, string[]> = {
         "so_luong_hoc_sinh",
         "muc_do_uu_tien",
         "dac_diem_khach_hang",
+        "ngay_cap_nhat",
     ],
     quatrian: [
         "ngay_tang",
@@ -30,6 +31,7 @@ export const SHEETS: Record<SheetName, string[]> = {
         "Tong_tien_qua",
         "dip_tang",
         "status",
+        "ngay_cap_nhat",
     ],
     chuongtrinh: [
         "ten_truong",
@@ -44,6 +46,7 @@ export const SHEETS: Record<SheetName, string[]> = {
         "ngay_du_kien",
         "status",
         "ghi_chu",
+        "ngay_cap_nhat",
     ],
     taikhoan: [
         "username",

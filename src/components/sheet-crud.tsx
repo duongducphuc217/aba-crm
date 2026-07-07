@@ -77,6 +77,7 @@ const COLUMN_LABELS: Record<string, string> = {
     doanh_thu: "Doanh thu",
     ngay_du_kien: "Ngày dự kiến",
     ghi_chu: "Ghi chú",
+    ngay_cap_nhat: "Ngày cập nhật",
 };
 
 const MONEY_COLUMNS = new Set(["don_gia", "doanh_thu", "don_gia_qua", "Tong_tien_qua"]);
@@ -261,11 +262,24 @@ export function SheetCrud({ sheet, title, subtitle, addLabel, columns, rows, pri
         setCurrentPage(1);
     }, [query, statusFilter, capHocFilter, khuVucFilter, saleFilter]);
 
+    const sorted = useMemo(() => {
+        return [...filtered].sort((a, b) => {
+            const dateA = stringify(a.ngay_cap_nhat || "");
+            const dateB = stringify(b.ngay_cap_nhat || "");
+            if (dateA && dateB) {
+                return dateB.localeCompare(dateA);
+            }
+            if (dateA) return 1;
+            if (dateB) return -1;
+            return b._row - a._row;
+        });
+    }, [filtered]);
+
     const totalPages = Math.ceil(filtered.length / PAGE_SIZE) || 1;
     const paginatedItems = useMemo(() => {
         const start = (currentPage - 1) * PAGE_SIZE;
-        return filtered.slice(start, start + PAGE_SIZE);
-    }, [filtered, currentPage]);
+        return sorted.slice(start, start + PAGE_SIZE);
+    }, [sorted, currentPage]);
 
     function openAdd() {
         setEditing(null);
@@ -1198,7 +1212,7 @@ export function SheetCrud({ sheet, title, subtitle, addLabel, columns, rows, pri
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                    {columns.map((col) => (
+                                    {columns.filter((col) => col !== "ngay_cap_nhat").map((col) => (
                                         <div key={col} className={`flex flex-col gap-1.5 ${col === "dac_diem_khach_hang" ? "col-span-1 sm:col-span-2" : ""}`}>
                                             <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                                                 {columnLabel(col)}

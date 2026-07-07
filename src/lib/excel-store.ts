@@ -26,6 +26,18 @@ const headerCache = new Map<SheetName, string[]>();
 const dataCache = new Map<SheetName, { records: RowRecord[]; timestamp: number }>();
 const DATA_CACHE_TTL = 10000; // 10 seconds
 
+function getNowString(): string {
+    const d = new Date();
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const year = d.getFullYear();
+    const month = pad(d.getMonth() + 1);
+    const day = pad(d.getDate());
+    const hours = pad(d.getHours());
+    const minutes = pad(d.getMinutes());
+    const seconds = pad(d.getSeconds());
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+
 function assertConfig() {
     if (!SPREADSHEET_ID) throw new Error("Thiếu GOOGLE_SHEETS_SPREADSHEET_ID trong .env.local");
 }
@@ -200,6 +212,9 @@ export async function addRow(
     data: Record<string, unknown>
 ): Promise<RowRecord> {
     dataCache.delete(sheet);
+    if (SHEETS[sheet].includes("ngay_cap_nhat")) {
+        data = { ...data, ngay_cap_nhat: getNowString() };
+    }
     // Auto-generate MA_KH for danhsach sheet
     if (sheet === "danhsach" && !data.MA_KH) {
         data = { ...data, MA_KH: await nextMaKH() };
@@ -236,6 +251,9 @@ export async function updateRow(
 ): Promise<RowRecord> {
     if (rowNum < 2) throw new Error("Dòng không hợp lệ");
     dataCache.delete(sheet);
+    if (SHEETS[sheet].includes("ngay_cap_nhat")) {
+        data = { ...data, ngay_cap_nhat: getNowString() };
+    }
     const headers = await ensureHeaders(sheet);
 
     // Read current row
