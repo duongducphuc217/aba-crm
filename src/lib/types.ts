@@ -1,4 +1,4 @@
-export type SheetName = "danhsach" | "quatrian" | "chuongtrinh" | "taikhoan";
+export type SheetName = "danhsach" | "quatrian" | "chuongtrinh" | "taikhoan" | "daumoi";
 
 export type RowRecord = Record<string, string | number | null> & {
     _row: number;
@@ -55,5 +55,13 @@ export const SHEETS: Record<SheetName, string[]> = {
         "name",
         "fullname",
         "role",
+    ],
+    daumoi: [
+        "MA_KH",
+        "ho_ten",
+        "chuc_danh",
+        "phone",
+        "ghi_chu",
+        "ngay_cap_nhat",
     ],
 };

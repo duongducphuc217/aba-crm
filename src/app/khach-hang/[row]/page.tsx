@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowLeft, Building2, GraduationCap, Gift, MapPin, Phone, Star, User, Users, Briefcase, Pencil } from "lucide-react";
 import { CrmShell } from "@/components/crm-shell";
 import { Card, Badge, Button } from "@/components/ui";
+import { ContactsManager } from "@/components/contacts-manager";
 import { readSheet } from "@/lib/excel-store";
 import { formatMoney, formatNumber } from "@/lib/utils";
 
@@ -27,10 +28,11 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
     const { row: rowParam } = await params;
     const rowNum = parseInt(rowParam, 10);
 
-    const [allCustomers, allGifts, allPrograms] = await Promise.all([
+    const [allCustomers, allGifts, allPrograms, allContacts] = await Promise.all([
         readSheet("danhsach"),
         readSheet("quatrian"),
         readSheet("chuongtrinh"),
+        readSheet("daumoi"),
     ]);
 
     const customer = allCustomers.find((r) => r._row === rowNum);
@@ -53,6 +55,7 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
     // Match gifts & programs by ten_truong
     const gifts = allGifts.filter((g) => s(g.ten_truong) === name);
     const programs = allPrograms.filter((p) => s(p.ten_truong) === name);
+    const contacts = allContacts.filter((c) => s(c.MA_KH) === s(customer.MA_KH));
 
     const totalGiftCost = gifts.reduce((sum, g) => sum + (Number(g.Tong_tien_qua) || 0), 0);
     const totalRevenue = programs.reduce((sum, p) => sum + (Number(p.doanh_thu) || 0), 0);
@@ -116,6 +119,9 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
                         ))}
                     </div>
                 </Card>
+
+                {/* ── Contacts list ── */}
+                <ContactsManager contacts={contacts} customerId={s(customer.MA_KH)} />
 
                 {/* ── Customer Characteristics ── */}
                 <Card className="p-6">

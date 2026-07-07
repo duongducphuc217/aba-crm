@@ -122,12 +122,41 @@ async function ensureHeaders(sheet: SheetName): Promise<string[]> {
         return headerCache.get(sheet)!;
     }
 
-    const data = await apiFetch(
-        `/values/${enc(sheet)}!1:1?valueRenderOption=FORMATTED_VALUE`
-    );
-    const headers = ((data.values?.[0] as string[]) || []).map((h: string) =>
-        String(h).trim()
-    );
+    let headers: string[] = [];
+    try {
+        const data = await apiFetch(
+            `/values/${enc(sheet)}!1:1?valueRenderOption=FORMATTED_VALUE`
+        );
+        headers = ((data.values?.[0] as string[]) || []).map((h: string) =>
+            String(h).trim()
+        );
+    } catch (err: any) {
+        const errMsg = String(err?.message || "");
+        if (errMsg.includes("400") || errMsg.includes("Unable to parse range")) {
+            try {
+                await apiFetch(":batchUpdate", {
+                    method: "POST",
+                    body: JSON.stringify({
+                        requests: [
+                            {
+                                addSheet: {
+                                    properties: {
+                                        title: sheet,
+                                    },
+                                },
+                            },
+                        ],
+                    }),
+                });
+            } catch (createErr: any) {
+                console.error(`Không thể tự động tạo sheet ${sheet}:`, createErr);
+                throw err;
+            }
+        } else {
+            throw err;
+        }
+    }
+
     if (headers.length > 0) {
         headerCache.set(sheet, headers);
         return headers;
