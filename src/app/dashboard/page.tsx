@@ -12,31 +12,45 @@ export default async function DashboardPage() {
         ["Khách hàng", data.cards.customers, null, Users],
         ["Chương trình", data.cards.programs, formatPercent(data.comparison.program_count_change_pct), GraduationCap],
         ["Quà tặng", data.cards.gifts, formatPercent(data.comparison.gift_count_change_pct), Gift],
-        ["Doanh thu", formatMoney(data.cards.revenue), formatPercent(data.comparison.revenue_change_pct), Coins],
         ["Chi phí quà", formatMoney(data.cards.gift_cost), formatPercent(data.comparison.gift_cost_change_pct), ArrowUpRight],
+        ["Doanh thu", formatMoney(data.cards.revenue), formatPercent(data.comparison.revenue_change_pct), Coins],
     ] as const;
 
     return (
         <CrmShell>
-            <div className="grid gap-4 xl:grid-cols-5">
-                {cards.map(([label, value, change, Icon]) => (
-                    <Card key={String(label)} className="overflow-hidden p-5">
-                        <div className="flex items-start justify-between gap-3">
-                            <div>
-                                <div className="text-sm font-semibold text-slate-500">{label}</div>
-                                <div className="mt-3 text-3xl font-black tracking-tight text-slate-950">{value}</div>
+            <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-3 xl:grid-cols-5">
+                {cards.map(([label, value, change, Icon]) => {
+                    const isRevenue = label === "Doanh thu";
+                    return (
+                        <Card 
+                            key={String(label)} 
+                            className={`overflow-hidden p-4 md:p-5 flex flex-col justify-between ${
+                                isRevenue ? "col-span-2 lg:col-span-1" : "col-span-1"
+                            }`}
+                        >
+                            <div className="flex items-center justify-between gap-2.5">
+                                <div className="min-w-0">
+                                    <div className="text-xs font-semibold text-slate-500 truncate">{label}</div>
+                                    <div className="mt-1 text-xl md:text-2xl lg:text-3xl font-black tracking-tight text-slate-950 truncate">{value}</div>
+                                </div>
+                                <div className="grid h-9 w-9 md:h-11 md:w-11 shrink-0 place-items-center rounded-xl bg-slate-100 text-slate-700">
+                                    <Icon size={16} className="md:w-5 md:h-5" />
+                                </div>
                             </div>
-                            <div className="grid h-11 w-11 place-items-center rounded-2xl bg-slate-100 text-slate-700">
-                                <Icon size={20} />
-                            </div>
-                        </div>
-                        {change ? <Badge className="mt-4 bg-emerald-50 text-emerald-600">↗ So với kỳ trước: {change}</Badge> : <div className="mt-4 text-sm text-slate-400">Tổng hợp hiện tại</div>}
-                    </Card>
-                ))}
+                            {change ? (
+                                <div className="mt-2.5">
+                                    <Badge className="bg-emerald-50 text-emerald-600 text-[10px] md:text-xs">↗ {change}</Badge>
+                                </div>
+                            ) : (
+                                <div className="mt-2.5 text-[10px] md:text-xs font-medium text-slate-400">Tổng hợp</div>
+                            )}
+                        </Card>
+                    );
+                })}
             </div>
 
-            <div className="mt-6 grid gap-6 xl:grid-cols-3">
-                <Card className="p-6 xl:col-span-2">
+            <div className="mt-6 grid gap-6 lg:grid-cols-3">
+                <Card className="p-6 lg:col-span-2">
                     <div className="mb-5 flex items-center justify-between gap-3">
                         <div>
                             <h2 className="text-xl font-black tracking-tight text-slate-950">Doanh thu theo khu vực</h2>

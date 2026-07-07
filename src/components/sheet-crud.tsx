@@ -114,6 +114,7 @@ export function SheetCrud({ sheet, title, subtitle, addLabel, columns, rows, pri
     const [showForm, setShowForm] = useState(false);
     const [form, setForm] = useState<Record<string, string>>(() => emptyRecord(columns));
     const [query, setQuery] = useState("");
+    const [showFilters, setShowFilters] = useState(false);
     const [statusFilter, setStatusFilter] = useState("");
     const [capHocFilter, setCapHocFilter] = useState("");
     const [khuVucFilter, setKhuVucFilter] = useState("");
@@ -463,54 +464,54 @@ export function SheetCrud({ sheet, title, subtitle, addLabel, columns, rows, pri
 
             {/* ── Statistical overview cards (only for gifts) ───────────────── */}
             {sheet === "quatrian" && (
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                    <Card className="p-4 space-y-2 bg-white border border-slate-200 shadow-sm rounded-xl">
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                    <Card className="p-3 md:p-4 space-y-1 bg-white border border-slate-200 shadow-sm rounded-xl">
                         <span className="text-xs font-semibold text-slate-500">Tổng quà</span>
-                        <div className="text-3xl font-black text-slate-900">
+                        <div className="text-xl md:text-3xl font-black text-slate-900">
                             {filtered.length}
                         </div>
-                        <p className="text-[10px] text-slate-400">Theo bộ lọc hiện tại</p>
+                        <p className="text-[10px] text-slate-400 truncate">Theo bộ lọc hiện tại</p>
                     </Card>
-                    <Card className="p-4 space-y-2 bg-white border border-slate-200 shadow-sm rounded-xl">
+                    <Card className="p-3 md:p-4 space-y-1 bg-white border border-slate-200 shadow-sm rounded-xl">
                         <span className="text-xs font-semibold text-slate-500">Tổng số lượng</span>
-                        <div className="text-3xl font-black text-slate-900">
+                        <div className="text-xl md:text-3xl font-black text-slate-900">
                             {new Intl.NumberFormat("vi-VN").format(filtered.reduce((acc, row) => acc + (Number(row.so_luong_qua) || 0), 0))}
                         </div>
-                        <p className="text-[10px] text-slate-400">Số lượng quà đã ghi nhận</p>
+                        <p className="text-[10px] text-slate-400 truncate">Số lượng quà đã ghi nhận</p>
                     </Card>
-                    <Card className="p-4 space-y-2 bg-white border border-slate-200 shadow-sm rounded-xl">
+                    <Card className="p-3 md:p-4 space-y-1 bg-white border border-slate-200 shadow-sm rounded-xl col-span-2 sm:col-span-1">
                         <span className="text-xs font-semibold text-slate-500">Tổng chi phí</span>
-                        <div className="text-3xl font-black text-blue-600">
+                        <div className="text-xl md:text-3xl font-black text-blue-600">
                             {formatMoney(filtered.reduce((acc, row) => acc + (Number(row.Tong_tien_qua) || 0), 0))}
                         </div>
-                        <p className="text-[10px] text-slate-400">Format VND theo bộ lọc</p>
+                        <p className="text-[10px] text-slate-400 truncate">Format VND theo bộ lọc</p>
                     </Card>
                 </div>
             )}
 
             {/* ── Statistical overview cards (only for programs) ────────────── */}
             {sheet === "chuongtrinh" && (
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                    <Card className="p-4 space-y-2 bg-white border border-slate-200 shadow-sm rounded-xl">
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                    <Card className="p-3 md:p-4 space-y-1 bg-white border border-slate-200 shadow-sm rounded-xl">
                         <span className="text-xs font-semibold text-slate-500">Tổng chương trình</span>
-                        <div className="text-3xl font-black text-slate-900">
+                        <div className="text-xl md:text-3xl font-black text-slate-900">
                             {filtered.length}
                         </div>
-                        <p className="text-[10px] text-slate-400">Theo bộ lọc hiện tại</p>
+                        <p className="text-[10px] text-slate-400 truncate">Theo bộ lọc hiện tại</p>
                     </Card>
-                    <Card className="p-4 space-y-2 bg-white border border-slate-200 shadow-sm rounded-xl">
+                    <Card className="p-3 md:p-4 space-y-1 bg-white border border-slate-200 shadow-sm rounded-xl">
                         <span className="text-xs font-semibold text-slate-500">Tổng số lượng</span>
-                        <div className="text-3xl font-black text-slate-900">
+                        <div className="text-xl md:text-3xl font-black text-slate-900">
                             {new Intl.NumberFormat("vi-VN").format(filtered.reduce((acc, row) => acc + (Number(row.so_luong) || 0), 0))}
                         </div>
-                        <p className="text-[10px] text-slate-400">Số lượng triển khai đã ghi nhận</p>
+                        <p className="text-[10px] text-slate-400 truncate">Số lượng triển khai đã ghi nhận</p>
                     </Card>
-                    <Card className="p-4 space-y-2 bg-white border border-slate-200 shadow-sm rounded-xl">
+                    <Card className="p-3 md:p-4 space-y-1 bg-white border border-slate-200 shadow-sm rounded-xl col-span-2 sm:col-span-1">
                         <span className="text-xs font-semibold text-slate-500">Tổng doanh thu dự kiến</span>
-                        <div className="text-3xl font-black text-blue-600">
+                        <div className="text-xl md:text-3xl font-black text-blue-600">
                             {formatMoney(filtered.reduce((acc, row) => acc + (Number(row.doanh_thu) || 0), 0))}
                         </div>
-                        <p className="text-[10px] text-slate-400">Format VND theo bộ lọc</p>
+                        <p className="text-[10px] text-slate-400 truncate">Format VND theo bộ lọc</p>
                     </Card>
                 </div>
             )}
@@ -533,35 +534,55 @@ export function SheetCrud({ sheet, title, subtitle, addLabel, columns, rows, pri
 
                 {/* All controls share h-10 via the ui primitives */}
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-5">
-                    <Input
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                        placeholder="Tìm tên, SĐT, khu vực..."
-                    />
-                    {capHocOptions.length > 0 && (
-                        <Select value={capHocFilter} onChange={(e) => setCapHocFilter(e.target.value)}>
-                            <option value="">Tất cả cấp học</option>
-                            {capHocOptions.map((s) => <option key={s} value={s}>{s}</option>)}
-                        </Select>
-                    )}
-                    {khuVucOptions.length > 0 && (
-                        <Select value={khuVucFilter} onChange={(e) => setKhuVucFilter(e.target.value)}>
-                            <option value="">Tất cả khu vực</option>
-                            {khuVucOptions.map((s) => <option key={s} value={s}>{s}</option>)}
-                        </Select>
-                    )}
-                    {saleOptions.length > 0 && (
-                        <Select value={saleFilter} onChange={(e) => setSaleFilter(e.target.value)}>
-                            <option value="">Tất cả sale</option>
-                            {saleOptions.map((s) => <option key={s} value={s}>{s}</option>)}
-                        </Select>
-                    )}
-                    {statusCol && statusOptions.length > 0 && (
-                        <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-                            <option value="">Tất cả trạng thái</option>
-                            {statusOptions.map((s) => <option key={s} value={s}>{s}</option>)}
-                        </Select>
-                    )}
+                    <div className="flex gap-2 sm:col-span-2 xl:col-span-1">
+                        <Input
+                            value={query}
+                            onChange={(e) => setQuery(e.target.value)}
+                            placeholder="Tìm tên, SĐT, khu vực..."
+                        />
+                        {(capHocOptions.length > 0 || khuVucOptions.length > 0 || saleOptions.length > 0 || (statusCol && statusOptions.length > 0)) && (
+                            <Button
+                                type="button"
+                                onClick={() => setShowFilters(!showFilters)}
+                                className={`flex items-center gap-1.5 px-3 border border-slate-200 rounded-xl shadow-sm cursor-pointer ${showFilters || activeFilters > 0 ? "bg-indigo-50 border-indigo-200 text-indigo-700" : "bg-white text-slate-600 hover:bg-slate-50"} xl:hidden shrink-0`}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                                <span className="hidden sm:inline">Lọc</span>
+                                {activeFilters > 0 && (
+                                    <span className="grid h-4 min-w-4 place-items-center rounded-full bg-indigo-600 px-1 text-[10px] font-black text-white">
+                                        {activeFilters}
+                                    </span>
+                                )}
+                            </Button>
+                        )}
+                    </div>
+
+                    <div className={`contents ${showFilters ? "" : "hidden xl:contents"}`}>
+                        {capHocOptions.length > 0 && (
+                            <Select value={capHocFilter} onChange={(e) => setCapHocFilter(e.target.value)}>
+                                <option value="">Tất cả cấp học</option>
+                                {capHocOptions.map((s) => <option key={s} value={s}>{s}</option>)}
+                            </Select>
+                        )}
+                        {khuVucOptions.length > 0 && (
+                            <Select value={khuVucFilter} onChange={(e) => setKhuVucFilter(e.target.value)}>
+                                <option value="">Tất cả khu vực</option>
+                                {khuVucOptions.map((s) => <option key={s} value={s}>{s}</option>)}
+                            </Select>
+                        )}
+                        {saleOptions.length > 0 && (
+                            <Select value={saleFilter} onChange={(e) => setSaleFilter(e.target.value)}>
+                                <option value="">Tất cả sale</option>
+                                {saleOptions.map((s) => <option key={s} value={s}>{s}</option>)}
+                            </Select>
+                        )}
+                        {statusCol && statusOptions.length > 0 && (
+                            <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+                                <option value="">Tất cả trạng thái</option>
+                                {statusOptions.map((s) => <option key={s} value={s}>{s}</option>)}
+                            </Select>
+                        )}
+                    </div>
                 </div>
             </Card>
 
@@ -642,18 +663,19 @@ export function SheetCrud({ sheet, title, subtitle, addLabel, columns, rows, pri
             {/* ── Pagination Controls ──────────────────────── */}
             {totalPages > 1 && (
                 <div className="flex items-center justify-between border-t border-slate-100 bg-white px-4 py-3 sm:px-6 rounded-xl border border-slate-200 shadow-sm">
-                    <div className="flex flex-1 justify-between sm:hidden">
+                    <div className="flex flex-1 items-center justify-between sm:hidden">
                         <Button
                             onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                             disabled={currentPage === 1}
-                            className="disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-30 cursor-pointer"
                         >
                             Trước
                         </Button>
+                        <span className="text-xs font-bold text-slate-500">Trang {currentPage} / {totalPages}</span>
                         <Button
                             onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                             disabled={currentPage === totalPages}
-                            className="disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-30 cursor-pointer"
                         >
                             Sau
                         </Button>

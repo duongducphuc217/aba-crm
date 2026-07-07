@@ -180,7 +180,7 @@ export function PipelineBoard({ initialRows }: { initialRows: RowRecord[] }) {
     }, [rows]);
 
     return (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
+        <div className="flex overflow-x-auto gap-4 pb-4 md:grid md:grid-cols-5 md:overflow-visible">
             {COLUMNS.map((col) => {
                 const items = grouped[col.key];
                 const Icon = col.icon;
@@ -189,6 +189,7 @@ export function PipelineBoard({ initialRows }: { initialRows: RowRecord[] }) {
                 return (
                     <div
                         key={col.key}
+                        className="w-[280px] shrink-0 md:w-auto md:shrink"
                         onDragOver={(e) => handleDragOver(e, col.key)}
                         onDragLeave={handleDragLeave}
                         onDrop={(e) => handleDrop(e, col.key)}

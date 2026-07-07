@@ -22,6 +22,10 @@ const NUMERIC_COLUMNS = new Set([
 const SPREADSHEET_ID = process.env.GOOGLE_SHEETS_SPREADSHEET_ID || "";
 const BASE = "https://sheets.googleapis.com/v4/spreadsheets";
 
+const headerCache = new Map<SheetName, string[]>();
+const dataCache = new Map<SheetName, { records: RowRecord[]; timestamp: number }>();
+const DATA_CACHE_TTL = 10000; // 10 seconds
+
 function assertConfig() {
     if (!SPREADSHEET_ID) throw new Error("Thiếu GOOGLE_SHEETS_SPREADSHEET_ID trong .env.local");
 }
@@ -102,20 +106,28 @@ function enc(s: string) {
 }
 
 async function ensureHeaders(sheet: SheetName): Promise<string[]> {
+    if (headerCache.has(sheet)) {
+        return headerCache.get(sheet)!;
+    }
+
     const data = await apiFetch(
         `/values/${enc(sheet)}!1:1?valueRenderOption=FORMATTED_VALUE`
     );
     const headers = ((data.values?.[0] as string[]) || []).map((h: string) =>
         String(h).trim()
     );
-    if (headers.length > 0) return headers;
+    if (headers.length > 0) {
+        headerCache.set(sheet, headers);
+        return headers;
+    }
 
     // Create headers if sheet is empty
+    const defaultHeaders = SHEETS[sheet];
     await apiFetch(
         `/values/${enc(sheet)}!A1?valueInputOption=USER_ENTERED`,
         {
             method: "PUT",
-            body: JSON.stringify({ values: [SHEETS[sheet]] }),
+            body: JSON.stringify({ values: [defaultHeaders] }),
         }
     );
 
@@ -134,10 +146,17 @@ async function ensureHeaders(sheet: SheetName): Promise<string[]> {
         );
     }
 
-    return SHEETS[sheet];
+    headerCache.set(sheet, defaultHeaders);
+    return defaultHeaders;
 }
 
 export async function readSheet(sheet: SheetName): Promise<RowRecord[]> {
+    const cached = dataCache.get(sheet);
+    const now = Date.now();
+    if (cached && (now - cached.timestamp < DATA_CACHE_TTL)) {
+        return cached.records;
+    }
+
     const headers = await ensureHeaders(sheet);
     const data = await apiFetch(
         `/values/${enc(sheet)}!A:Z?valueRenderOption=UNFORMATTED_VALUE&dateTimeRenderOption=FORMATTED_STRING`
@@ -160,6 +179,8 @@ export async function readSheet(sheet: SheetName): Promise<RowRecord[]> {
         });
         records.push(record);
     }
+
+    dataCache.set(sheet, { records, timestamp: now });
     return records;
 }
 
@@ -178,6 +199,7 @@ export async function addRow(
     sheet: SheetName,
     data: Record<string, unknown>
 ): Promise<RowRecord> {
+    dataCache.delete(sheet);
     // Auto-generate MA_KH for danhsach sheet
     if (sheet === "danhsach" && !data.MA_KH) {
         data = { ...data, MA_KH: await nextMaKH() };
@@ -213,6 +235,7 @@ export async function updateRow(
     data: Record<string, unknown>
 ): Promise<RowRecord> {
     if (rowNum < 2) throw new Error("Dòng không hợp lệ");
+    dataCache.delete(sheet);
     const headers = await ensureHeaders(sheet);
 
     // Read current row
@@ -257,6 +280,7 @@ export async function deleteRow(
     rowNum: number
 ): Promise<void> {
     if (rowNum < 2) throw new Error("Dòng không hợp lệ");
+    dataCache.delete(sheet);
     const sheetId = await getSheetId(sheet);
     await apiFetch(":batchUpdate", {
         method: "POST",

@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { ArrowLeft, Building2, Calendar, MapPin, Phone, User, Users, Tag } from "lucide-react";
+import { ArrowLeft, Building2, Calendar, MapPin, Phone, User, Users, Tag, Pencil } from "lucide-react";
 import { CrmShell } from "@/components/crm-shell";
-import { Card, Badge } from "@/components/ui";
+import { Card, Badge, Button } from "@/components/ui";
 import { readSheet } from "@/lib/excel-store";
 import { formatMoney, formatNumber } from "@/lib/utils";
 
@@ -75,10 +75,17 @@ export default async function ProgramDetailPage({ params }: { params: Promise<{ 
         <CrmShell title="Chi tiết Chương trình">
             <div className="space-y-6">
 
-                {/* ── Back link ── */}
-                <Link href="/chuong-trinh" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-indigo-600">
-                    <ArrowLeft size={16} /> Quay lại danh sách
-                </Link>
+                {/* ── Back link & Actions ── */}
+                <div className="flex items-center justify-between">
+                    <Link href="/chuong-trinh" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-indigo-600">
+                        <ArrowLeft size={16} /> Quay lại danh sách
+                    </Link>
+                    <Link href={`/chuong-trinh?edit=${rowNum}`} passHref legacyBehavior>
+                        <Button className="shrink-0 bg-indigo-600 text-white shadow-sm shadow-indigo-200 hover:bg-indigo-700 active:bg-indigo-800 cursor-pointer">
+                            <Pencil size={16} /> Sửa chương trình
+                        </Button>
+                    </Link>
+                </div>
 
                 {/* ── Program info ── */}
                 <Card className="p-6">

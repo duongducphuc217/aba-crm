@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { BarChart3, Columns3, Gift, GraduationCap, Home, RefreshCw, Settings, Sparkles, Users, LogOut, User as UserIcon, Key } from "lucide-react";
+import { BarChart3, Columns3, Gift, GraduationCap, Home, RefreshCw, Settings, Sparkles, Users, LogOut, User as UserIcon, Key, Menu, X } from "lucide-react";
 
 const nav = [
     ["Dashboard Báo cáo", "/dashboard", BarChart3],
@@ -20,6 +20,7 @@ function isActive(label: string, title: string) {
 export function CrmShell({ children, title = "Dashboard Báo cáo" }: { children: React.ReactNode; title?: string }) {
     const router = useRouter();
     const [user, setUser] = useState<{ name: string; role: string; username: string } | null>(null);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     useEffect(() => {
         fetch("/api/auth/me")
@@ -96,102 +97,145 @@ export function CrmShell({ children, title = "Dashboard Báo cáo" }: { children
         }
     }
 
+    const sidebarContent = (
+        <>
+            <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-br from-indigo-100 via-sky-50 to-transparent pointer-events-none" />
+            <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="relative flex items-center gap-3 px-6 py-7">
+                <div className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-indigo-600 to-sky-500 text-white shadow-lg shadow-indigo-200">
+                    <Sparkles size={22} />
+                </div>
+                <div>
+                    <div className="text-xl font-black leading-5 tracking-tight text-slate-950">ABA</div>
+                    <div className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">School CRM</div>
+                </div>
+            </Link>
+
+            <div className="relative px-4">
+                <div className="mb-3 px-3 text-[11px] font-black uppercase tracking-widest text-slate-400">Quản lý tổng</div>
+                <nav className="space-y-2">
+                    {nav.map(([label, href, Icon]) => {
+                        const active = isActive(label, title);
+                        return (
+                            <Link key={label} href={href} onClick={() => setIsMobileMenuOpen(false)} className={`group flex h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold transition ${active ? "bg-indigo-50 text-indigo-700 shadow-sm ring-1 ring-indigo-100" : "text-slate-600 hover:bg-white hover:text-indigo-700 hover:shadow-sm"}`}>
+                                <span className={`grid h-9 w-9 place-items-center rounded-xl transition ${active ? "bg-white text-indigo-600 shadow-sm" : "bg-slate-100 text-slate-500 group-hover:bg-indigo-50 group-hover:text-indigo-600"}`}>
+                                    <Icon size={18} />
+                                </span>
+                                <span>{label}</span>
+                            </Link>
+                        );
+                    })}
+                </nav>
+            </div>
+
+            <div className="absolute bottom-4 left-4 right-4 rounded-2xl border border-slate-200 bg-white/80 p-3.5 shadow-sm backdrop-blur">
+                {user ? (
+                    <div className="flex items-center justify-between gap-2.5">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-indigo-50 text-indigo-600 font-black text-sm uppercase">
+                                {user.name ? user.name.slice(0, 2) : "US"}
+                            </div>
+                            <div className="min-w-0">
+                                <div className="text-xs font-black text-slate-900 truncate leading-tight">{user.name}</div>
+                                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mt-0.5">{user.role}</div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                            <button
+                                onClick={() => {
+                                    setIsMobileMenuOpen(false);
+                                    setShowPasswordModal(true);
+                                }}
+                                title="Đổi mật khẩu"
+                                className="grid h-8 w-8 place-items-center rounded-lg border border-slate-100 text-slate-400 hover:border-indigo-100 hover:bg-indigo-50 hover:text-indigo-600 transition cursor-pointer"
+                            >
+                                <Key size={14} />
+                            </button>
+                            <button
+                                onClick={handleLogout}
+                                title="Đăng xuất"
+                                className="grid h-8 w-8 place-items-center rounded-lg border border-slate-100 text-slate-400 hover:border-red-100 hover:bg-red-50 hover:text-red-500 transition cursor-pointer"
+                            >
+                                <LogOut size={14} />
+                            </button>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="flex items-center gap-3">
+                        <div className="grid h-9 w-9 place-items-center rounded-xl bg-slate-100 text-slate-400">
+                            <UserIcon size={15} />
+                        </div>
+                        <div>
+                            <div className="text-xs font-bold text-slate-400">Đang xác thực...</div>
+                        </div>
+                    </div>
+                )}
+                <div className="mt-2.5 pt-2.5 border-t border-slate-100 flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-600">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        CRM Google Sheets Connected
+                    </div>
+                </div>
+            </div>
+        </>
+    );
+
     return (
         <div className="min-h-screen text-slate-950">
+            {/* Desktop Sidebar aside */}
             <aside className="fixed left-4 top-4 z-30 hidden h-[calc(100vh-32px)] w-[264px] overflow-hidden rounded-[2rem] border border-white/70 bg-white/80 shadow-2xl shadow-slate-200/70 backdrop-blur-xl xl:block">
-                <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-br from-indigo-100 via-sky-50 to-transparent" />
-                <Link href="/" className="relative flex items-center gap-3 px-6 py-7">
-                    <div className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-indigo-600 to-sky-500 text-white shadow-lg shadow-indigo-200">
-                        <Sparkles size={22} />
-                    </div>
-                    <div>
-                        <div className="text-xl font-black leading-5 tracking-tight text-slate-950">ABA</div>
-                        <div className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">School CRM</div>
-                    </div>
-                </Link>
+                {sidebarContent}
+            </aside>
 
-                <div className="relative px-4">
-                    <div className="mb-3 px-3 text-[11px] font-black uppercase tracking-widest text-slate-400">Quản lý tổng</div>
-                    <nav className="space-y-2">
-                        {nav.map(([label, href, Icon]) => {
-                            const active = isActive(label, title);
-                            return (
-                                <Link key={label} href={href} className={`group flex h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold transition ${active ? "bg-indigo-50 text-indigo-700 shadow-sm ring-1 ring-indigo-100" : "text-slate-600 hover:bg-white hover:text-indigo-700 hover:shadow-sm"}`}>
-                                    <span className={`grid h-9 w-9 place-items-center rounded-xl transition ${active ? "bg-white text-indigo-600 shadow-sm" : "bg-slate-100 text-slate-500 group-hover:bg-indigo-50 group-hover:text-indigo-600"}`}>
-                                        <Icon size={18} />
-                                    </span>
-                                    <span>{label}</span>
-                                </Link>
-                            );
-                        })}
-                    </nav>
-                </div>
-
-                <div className="absolute bottom-4 left-4 right-4 rounded-2xl border border-slate-200 bg-white/80 p-3.5 shadow-sm backdrop-blur">
-                    {user ? (
-                        <div className="flex items-center justify-between gap-2.5">
-                            <div className="flex items-center gap-2.5 min-w-0">
-                                <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-indigo-50 text-indigo-600 font-black text-sm uppercase">
-                                    {user.name ? user.name.slice(0, 2) : "US"}
-                                </div>
-                                <div className="min-w-0">
-                                    <div className="text-xs font-black text-slate-900 truncate leading-tight">{user.name}</div>
-                                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mt-0.5">{user.role}</div>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-1 shrink-0">
-                                <button
-                                    onClick={() => setShowPasswordModal(true)}
-                                    title="Đổi mật khẩu"
-                                    className="grid h-8 w-8 place-items-center rounded-lg border border-slate-100 text-slate-400 hover:border-indigo-100 hover:bg-indigo-50 hover:text-indigo-600 transition"
-                                >
-                                    <Key size={14} />
-                                </button>
-                                <button
-                                    onClick={handleLogout}
-                                    title="Đăng xuất"
-                                    className="grid h-8 w-8 place-items-center rounded-lg border border-slate-100 text-slate-400 hover:border-red-100 hover:bg-red-50 hover:text-red-500 transition"
-                                >
-                                    <LogOut size={14} />
-                                </button>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="flex items-center gap-3">
-                            <div className="grid h-9 w-9 place-items-center rounded-xl bg-slate-100 text-slate-400">
-                                <UserIcon size={15} />
-                            </div>
-                            <div>
-                                <div className="text-xs font-bold text-slate-400">Đang xác thực...</div>
-                            </div>
-                        </div>
-                    )}
-                    <div className="mt-2.5 pt-2.5 border-t border-slate-100 flex items-center justify-between">
-                        <div className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-600">
-                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                            CRM Google Sheets Connected
-                        </div>
-                    </div>
-                </div>
+            {/* Mobile Sidebar overlay & drawer */}
+            <div
+                className={`fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300 xl:hidden ${
+                    isMobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+                }`}
+                onClick={() => setIsMobileMenuOpen(false)}
+            />
+            <aside
+                className={`fixed left-4 top-4 z-50 h-[calc(100vh-32px)] w-[264px] overflow-hidden rounded-[2rem] border border-white/70 bg-white/80 shadow-2xl shadow-slate-200/70 backdrop-blur-xl transition-all duration-300 ease-out xl:hidden ${
+                    isMobileMenuOpen ? "translate-x-0 opacity-100" : "-translate-x-[290px] opacity-0"
+                }`}
+            >
+                <button
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="absolute right-4 top-4 z-50 grid h-9 w-9 place-items-center rounded-xl bg-slate-100/80 text-slate-500 hover:bg-slate-200/80 active:bg-slate-300/80 transition cursor-pointer"
+                    title="Đóng menu"
+                >
+                    <X size={16} />
+                </button>
+                {sidebarContent}
             </aside>
 
             <div className="xl:pl-[296px]">
-                <header className="sticky top-0 z-20 border-b border-white/70 bg-white/70 px-5 py-4 backdrop-blur-xl md:px-10">
-                    <div className="mx-auto flex max-w-[1400px] items-center justify-between gap-4">
-                        <div>
-                            <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.22em] text-indigo-500">
-                                <Home size={14} /> CRM Workspace
+                <header className="sticky top-0 z-20 border-b border-white/70 bg-white/70 px-4 py-3 backdrop-blur-xl md:px-10 md:py-4">
+                    <div className="mx-auto flex max-w-[1400px] items-center justify-between gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                            {/* Hamburger Menu Toggle Button */}
+                            <button
+                                onClick={() => setIsMobileMenuOpen(true)}
+                                className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm hover:bg-slate-50 active:bg-slate-100/80 transition xl:hidden cursor-pointer"
+                                title="Menu"
+                            >
+                                <Menu size={20} />
+                            </button>
+
+                            <div className="min-w-0">
+                                <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.22em] text-indigo-500">
+                                    <Home size={14} className="shrink-0" /> <span className="truncate">CRM Workspace</span>
+                                </div>
+                                <h1 className="mt-0.5 text-lg font-black tracking-tight text-slate-950 md:text-2xl md:mt-1 truncate">{title}</h1>
                             </div>
-                            <h1 className="mt-1 text-2xl font-black tracking-tight text-slate-950">{title}</h1>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 shrink-0">
                             <span className="hidden h-10 items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 text-sm font-semibold text-emerald-600 md:inline-flex">● Đã cập nhật</span>
-                            <button className="grid h-10 w-10 place-items-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50" title="Làm mới"><RefreshCw size={17} /></button>
+                            <button className="grid h-10 w-10 place-items-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50 cursor-pointer" title="Làm mới"><RefreshCw size={17} /></button>
                             <button className="hidden h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50 md:inline-flex"><Settings size={16} /> Thiết lập</button>
                         </div>
                     </div>
                 </header>
-                <main className="min-h-[calc(100vh-81px)] px-5 py-8 md:px-10">
+                <main className="min-h-[calc(100vh-81px)] px-3 py-5 md:px-10 md:py-8">
                     <div className="mx-auto max-w-[1400px]">{children}</div>
                 </main>
             </div>
