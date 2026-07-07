@@ -82,9 +82,9 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
                     </Link>
                     <Link
                         href={`/khach-hang?edit=${rowNum}`}
-                        className="inline-flex h-9 items-center gap-2 rounded-xl bg-indigo-600 px-4 text-xs font-bold text-white shadow-sm shadow-indigo-100 transition hover:bg-indigo-700 active:bg-indigo-800"
+                        className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 text-sm font-semibold text-white shadow-sm shadow-indigo-200 transition-all duration-150 hover:bg-indigo-700 active:bg-indigo-800"
                     >
-                        <Pencil size={14} /> Sửa thông tin
+                        <Pencil size={16} /> Sửa thông tin
                     </Link>
                 </div>
 
