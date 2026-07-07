@@ -33,8 +33,8 @@ export function proxy(req: NextRequest) {
         }
     }
     
-    // If already authenticated and trying to access /login, redirect to /dashboard
-    if (pathname === "/login") {
+    // If already authenticated and trying to access / or /login, redirect to /dashboard
+    if (pathname === "/login" || pathname === "/") {
         const token = req.cookies.get("session")?.value;
         if (token) {
             const payload = verifyToken(token);

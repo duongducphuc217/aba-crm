@@ -1,45 +1,154 @@
-import Link from "next/link";
-import { ArrowRight, BarChart3, Gift, GraduationCap, Sparkles, Users } from "lucide-react";
+"use client";
 
-const items = [
-  ["Dashboard", "/dashboard", "Tổng quan KPI, doanh thu, chi phí và xu hướng theo kỳ.", BarChart3],
-  ["Khách hàng", "/khach-hang", "Danh sách trường, bộ lọc thông minh và chỉnh sửa dữ liệu Excel.", Users],
-  ["Quà tặng", "/qua-tang", "Lịch sử chăm sóc, trạng thái gửi/nhận và ngân sách tri ân.", Gift],
-  ["Chương trình", "/chuong-trinh", "Cơ hội bán hàng, chương trình đã chốt và doanh thu dự kiến.", GraduationCap],
-] as const;
+import { Suspense, useState, useTransition } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { KeyRound, Sparkles, User, AlertCircle } from "lucide-react";
+import { Button, Card, Input } from "@/components/ui";
+
+function LoginForm() {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
+    const [isPending, startTransition] = useTransition();
+
+    async function handleSubmit(e: React.FormEvent) {
+        e.preventDefault();
+        setError("");
+
+        if (!username.trim() || !password) {
+            setError("Vui lòng điền đầy đủ thông tin đăng nhập.");
+            return;
+        }
+
+        startTransition(async () => {
+            try {
+                const res = await fetch("/api/auth/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ 
+                        username: username.trim(), 
+                        password 
+                    }),
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.error || "Đăng nhập không thành công.");
+                }
+
+                router.push(callbackUrl);
+                router.refresh();
+            } catch (err) {
+                setError(err instanceof Error ? err.message : "Đăng nhập thất bại. Vui lòng thử lại.");
+            }
+        });
+    }
+
+    return (
+        <main className="relative flex min-h-screen items-center justify-center px-4 py-12 sm:px-6 lg:px-8 overflow-hidden bg-slate-50">
+            {/* Background design accents */}
+            <div className="absolute right-[-10%] top-[-10%] h-[500px] w-[500px] rounded-full bg-indigo-100/70 blur-3xl" />
+            <div className="absolute left-[-5%] bottom-[-10%] h-[400px] w-[400px] rounded-full bg-sky-100/70 blur-3xl" />
+            
+            <div className="relative w-full max-w-[440px]">
+                {/* Brand Logo Header */}
+                <div className="flex flex-col items-center mb-8">
+                    <div className="flex items-center gap-2.5 rounded-2xl border border-indigo-100 bg-indigo-50/80 px-4 py-2 text-sm font-black text-indigo-600 shadow-sm backdrop-blur-sm">
+                        <Sparkles size={16} className="animate-pulse" /> ABA School CRM
+                    </div>
+                    <h2 className="mt-4 text-center text-3xl font-black tracking-tight text-slate-900">
+                        Đăng nhập hệ thống
+                    </h2>
+                    <p className="mt-2 text-center text-sm text-slate-500 font-medium">
+                        Quản trị dữ liệu trường học và doanh thu dự kiến
+                    </p>
+                </div>
+
+                <Card className="p-6 md:p-8 border-white/70 bg-white/80 shadow-2xl shadow-slate-200/80 backdrop-blur-xl rounded-[2rem]">
+                    <form className="space-y-5" onSubmit={handleSubmit}>
+                        {error && (
+                            <div className="flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
+                                <AlertCircle size={16} className="shrink-0 mt-0.5" />
+                                <span>{error}</span>
+                            </div>
+                        )}
+
+                        <div className="space-y-4">
+                            {/* Username input */}
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                                    <User size={13} /> Tên đăng nhập
+                                </label>
+                                <Input
+                                    type="text"
+                                    required
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
+                                    placeholder="Ví dụ: admin"
+                                    disabled={isPending}
+                                    className="h-11 rounded-xl"
+                                />
+                            </div>
+
+                            {/* Password input */}
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                                    <KeyRound size={13} /> Mật khẩu
+                                </label>
+                                <Input
+                                    type="password"
+                                    required
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    placeholder="••••••••"
+                                    disabled={isPending}
+                                    className="h-11 rounded-xl"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Submit button with micro-animations & loading states */}
+                        <Button
+                            type="submit"
+                            disabled={isPending}
+                            className="w-full h-11 bg-indigo-600 text-white shadow-lg shadow-indigo-100 hover:bg-indigo-700 active:bg-indigo-800 transition hover:-translate-y-0.5 disabled:translate-y-0 disabled:shadow-none"
+                        >
+                            {isPending ? (
+                                <div className="flex items-center justify-center gap-2">
+                                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-indigo-300 border-t-white" />
+                                    <span>Đang xác thực...</span>
+                                </div>
+                            ) : (
+                                "Đăng nhập"
+                            )}
+                        </Button>
+                    </form>
+
+                    {/* Hint for developers / admins */}
+                    <div className="mt-6 border-t border-slate-100 pt-4 text-center">
+                        <span className="text-[11px] font-semibold text-slate-400 bg-slate-50 px-2.5 py-1.5 rounded-full inline-block">
+                            Đăng nhập bằng tài khoản được cấp.
+                        </span>
+                    </div>
+                </Card>
+            </div>
+        </main>
+    );
+}
 
 export default function Home() {
-  return (
-    <main className="min-h-screen px-6 py-8 md:px-10">
-      <div className="mx-auto max-w-7xl overflow-hidden rounded-[2.5rem] border border-white/70 bg-white/80 shadow-2xl shadow-slate-200/70 backdrop-blur-xl">
-        <section className="relative p-8 md:p-12">
-          <div className="absolute right-0 top-0 h-72 w-72 rounded-full bg-indigo-100 blur-3xl" />
-          <div className="absolute bottom-0 left-20 h-56 w-56 rounded-full bg-sky-100 blur-3xl" />
-          <div className="relative max-w-4xl">
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50 px-4 py-2 text-sm font-black text-indigo-600">
-              <Sparkles size={16} /> ABA School CRM
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center bg-slate-50">
+                <div className="h-8 w-8 animate-spin rounded-full border-3 border-slate-200 border-t-indigo-600" />
             </div>
-            <h1 className="text-4xl font-black tracking-tight text-slate-950 md:text-6xl">Dashboard quản lý khách hàng từ Excel</h1>
-            <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-600">Giao diện CRM hiện đại để quản lý trường học, chương trình, quà tặng và doanh thu dự kiến trực tiếp từ file Excel nội bộ.</p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/dashboard" className="inline-flex items-center gap-2 rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-black text-white shadow-xl shadow-indigo-200 transition hover:-translate-y-0.5 hover:bg-indigo-700">Mở Dashboard <ArrowRight size={17} /></Link>
-              <Link href="/khach-hang" className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-700 shadow-sm transition hover:-translate-y-0.5">Quản lý khách hàng</Link>
-            </div>
-          </div>
-        </section>
-
-        <section className="grid gap-4 border-t border-slate-200/80 bg-slate-50/60 p-6 md:grid-cols-4 md:p-8">
-          {items.map(([title, href, desc, Icon]) => (
-            <Link key={href} href={href} className="group rounded-3xl border border-slate-200/80 bg-white/90 p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200">
-              <div className="mb-5 grid h-12 w-12 place-items-center rounded-2xl bg-slate-100 text-slate-700 transition group-hover:bg-indigo-50 group-hover:text-indigo-600">
-                <Icon size={21} />
-              </div>
-              <div className="text-lg font-black text-slate-950">{title}</div>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{desc}</p>
-            </Link>
-          ))}
-        </section>
-      </div>
-    </main>
-  );
+        }>
+            <LoginForm />
+        </Suspense>
+    );
 }

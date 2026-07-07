@@ -132,7 +132,7 @@ function LoginForm() {
                     {/* Hint for developers / admins */}
                     <div className="mt-6 border-t border-slate-100 pt-4 text-center">
                         <span className="text-[11px] font-semibold text-slate-400 bg-slate-50 px-2.5 py-1.5 rounded-full inline-block">
-                            Tài khoản mặc định: <strong className="text-slate-600 font-bold">admin</strong> / <strong className="text-slate-600 font-bold">admin123</strong>
+                            Đăng nhập bằng tài khoản được cấp.
                         </span>
                     </div>
                 </Card>
