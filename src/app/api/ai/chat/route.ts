@@ -9,6 +9,12 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Thiếu API Key" }, { status: 400 });
         }
 
+        if (/[^\x00-\x7F]/.test(apiKey)) {
+            return NextResponse.json({ 
+                error: "Khóa API Key không hợp lệ (phát hiện ký tự tiếng Việt hoặc ký tự có dấu). Vui lòng kiểm tra lại thiết lập, tắt bộ gõ tiếng Việt (Unikey/EVKey) và nhập lại API Key chuẩn." 
+            }, { status: 400 });
+        }
+
         let aiText = "";
 
         if (provider === "Gemini") {
