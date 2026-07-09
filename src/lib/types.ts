@@ -9,6 +9,7 @@ export const SHEETS: Record<SheetName, string[]> = {
         "MA_KH",
         "ten_truong",
         "cap_hoc",
+        "email",
         "khu_vuc",
         "chuc_danh",
         "dau_moi_lien_he",

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, Building2, GraduationCap, Gift, MapPin, Phone, Star, User, Users, Briefcase, Pencil } from "lucide-react";
+import { ArrowLeft, Building2, GraduationCap, Gift, MapPin, Phone, Star, User, Users, Briefcase, Pencil, Mail } from "lucide-react";
 import { CrmShell } from "@/components/crm-shell";
 import { Card, Badge, Button } from "@/components/ui";
 import { ContactsManager } from "@/components/contacts-manager";
@@ -61,10 +61,10 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
     const totalRevenue = programs.reduce((sum, p) => sum + (Number(p.doanh_thu) || 0), 0);
 
     const row1Items = [
-        { icon: Building2, label: "Tên khách hàng", value: name },
         { icon: User, label: "Đầu mối liên hệ", value: s(customer.dau_moi_lien_he) },
         { icon: Briefcase, label: "Chức danh", value: s(customer.chuc_danh) },
         { icon: Phone, label: "Điện thoại", value: s(customer.phone) },
+        { icon: Mail, label: "Email", value: s(customer.email) },
     ];
 
     const row2Items = [
@@ -116,6 +116,10 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
                                     <div className="mt-0.5 truncate text-xs md:text-sm font-semibold text-slate-800" title={item.value || ""}>
                                         {item.label === "Điện thoại" && item.value ? (
                                             <a href={`tel:${item.value}`} className="hover:underline hover:text-indigo-600">
+                                                {item.value}
+                                            </a>
+                                        ) : item.label === "Email" && item.value ? (
+                                            <a href={`mailto:${item.value}`} className="hover:underline hover:text-indigo-600">
                                                 {item.value}
                                             </a>
                                         ) : (

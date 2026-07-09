@@ -55,6 +55,7 @@ const COLUMN_LABELS: Record<string, string> = {
     MA_KH: "Mã KH",
     ten_truong: "Tên khách hàng",
     cap_hoc: "Cấp học",
+    email: "Email",
     so_luong_hoc_sinh: "Số HS",
     khu_vuc: "Khu vực",
     chuc_danh: "Chức danh",

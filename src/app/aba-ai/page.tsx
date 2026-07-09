@@ -122,6 +122,7 @@ export default function AbaAiPage() {
                         chuc_danh: r.chuc_danh,
                         phone: r.phone,
                         cap_hoc: r.cap_hoc,
+                        email: r.email,
                         khu_vuc: r.khu_vuc,
                         sale: r.sale,
                         uu_tien: r.muc_do_uu_tien

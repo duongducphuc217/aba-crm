@@ -23,6 +23,7 @@ export default async function CustomersPage() {
                     "MA_KH",
                     "ten_truong",
                     "cap_hoc",
+                    "email",
                     "so_luong_hoc_sinh",
                     "khu_vuc",
                     "chuc_danh",
