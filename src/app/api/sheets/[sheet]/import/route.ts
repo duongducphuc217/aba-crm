@@ -53,7 +53,7 @@ export async function POST(
 
         const buffer = await file.arrayBuffer();
         const workbook = new ExcelJS.Workbook();
-        await workbook.xlsx.load(Buffer.from(buffer));
+        await workbook.xlsx.load(Buffer.from(buffer) as any);
 
         const worksheet = workbook.worksheets[0];
         if (!worksheet) {
