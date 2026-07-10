@@ -120,7 +120,7 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
                                             </a>
                                         ) : item.label === "Email" && item.value ? (
                                             <a href={`mailto:${item.value}`} className="hover:underline hover:text-indigo-600">
-                                                {item.value}
+                                                {item.value.length > 30 ? item.value.slice(0, 30) + "..." : item.value}
                                             </a>
                                         ) : (
                                             item.value || "—"

@@ -90,7 +90,14 @@ function columnLabel(column: string) {
 function formatCellValue(column: string, value: unknown) {
     if (value == null || String(value).trim() === "") return "";
     if (MONEY_COLUMNS.has(column)) return formatMoney(value);
-    return stringify(value);
+    const valStr = stringify(value);
+    if (column === "sale" && valStr.length > 10) {
+        return valStr.substring(0, 10) + "...";
+    }
+    if ((column === "email" || column === "dau_moi_lien_he") && valStr.length > 15) {
+        return valStr.substring(0, 15) + "...";
+    }
+    return valStr;
 }
 
 export function SheetCrud({ sheet, title, subtitle, addLabel, columns, rows, primaryCol, statusCol, displayOrder, detailBasePath }: Props) {
@@ -122,6 +129,77 @@ export function SheetCrud({ sheet, title, subtitle, addLabel, columns, rows, pri
     const [khuVucFilter, setKhuVucFilter] = useState("");
     const [saleFilter, setSaleFilter] = useState("");
     const [saving, setSaving] = useState(false);
+    const [isMounted, setIsMounted] = useState(false);
+    const [importing, setImporting] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    async function handleFileImport(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Reset file input value
+        e.target.value = "";
+
+        setImporting(true);
+        setMessage("");
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        try {
+            const res = await fetch(`/api/sheets/${sheet}/import`, {
+                method: "POST",
+                body: formData,
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                throw new Error(data.error || "Import thất bại");
+            }
+
+            if (data.rows && data.rows.length > 0) {
+                setItems((prev) => [...data.rows, ...prev]);
+                alert(`Import thành công ${data.rows.length} khách hàng!`);
+            } else {
+                alert("Không tìm thấy dòng dữ liệu nào hợp lệ để import.");
+            }
+            router.refresh();
+        } catch (err) {
+            setMessage(err instanceof Error ? err.message : "Có lỗi xảy ra khi import");
+        } finally {
+            setImporting(false);
+        }
+    }
+
+    // Load initial values from sessionStorage on mount to preserve filters between page navigation
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            setQuery(sessionStorage.getItem(`filter-query-${sheet}`) || "");
+            setStatusFilter(sessionStorage.getItem(`filter-status-${sheet}`) || "");
+            setCapHocFilter(sessionStorage.getItem(`filter-capHoc-${sheet}`) || "");
+            setKhuVucFilter(sessionStorage.getItem(`filter-khuVuc-${sheet}`) || "");
+            setSaleFilter(sessionStorage.getItem(`filter-sale-${sheet}`) || "");
+            setIsMounted(true);
+        }
+    }, [sheet]);
+
+    // Save values to sessionStorage on state changes
+    useEffect(() => {
+        if (isMounted && typeof window !== "undefined") {
+            sessionStorage.setItem(`filter-query-${sheet}`, query);
+            sessionStorage.setItem(`filter-status-${sheet}`, statusFilter);
+            sessionStorage.setItem(`filter-capHoc-${sheet}`, capHocFilter);
+            sessionStorage.setItem(`filter-khuVuc-${sheet}`, khuVucFilter);
+            sessionStorage.setItem(`filter-sale-${sheet}`, saleFilter);
+        }
+    }, [query, statusFilter, capHocFilter, khuVucFilter, saleFilter, sheet, isMounted]);
+
+    const clearFilters = () => {
+        setQuery("");
+        setStatusFilter("");
+        setCapHocFilter("");
+        setKhuVucFilter("");
+        setSaleFilter("");
+    };
     const [message, setMessage] = useState("");
     const [salesList, setSalesList] = useState<{ username: string; name: string }[]>([]);
     const [pendingDelete, setPendingDelete] = useState<RowRecord | null>(null);
@@ -456,10 +534,21 @@ export function SheetCrud({ sheet, title, subtitle, addLabel, columns, rows, pri
     }
 
     /* ── Active filters count (for UX indicator) ── */
-    const activeFilters = [statusFilter, capHocFilter, khuVucFilter, saleFilter].filter(Boolean).length;
+    const activeFilters = [query, statusFilter, capHocFilter, khuVucFilter, saleFilter].filter(Boolean).length;
 
     return (
         <div className="space-y-5">
+            {importing && (
+                <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
+                    <div className="bg-white p-6 rounded-2xl shadow-xl flex flex-col items-center gap-4 max-w-sm text-center">
+                        <div className="h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-indigo-600" />
+                        <div>
+                            <h3 className="font-bold text-slate-950">Đang import dữ liệu...</h3>
+                            <p className="text-xs text-slate-500 mt-1">Hệ thống đang tải dữ liệu lên Google Sheets. Vui lòng không đóng tab trình duyệt.</p>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* ── Page header ─────────────────────────────── */}
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -467,14 +556,43 @@ export function SheetCrud({ sheet, title, subtitle, addLabel, columns, rows, pri
                     <h2 className="text-2xl font-black tracking-tight text-slate-900">{title}</h2>
                     <p className="mt-0.5 text-sm text-slate-500">{subtitle}</p>
                 </div>
-                {/* Primary action — h-10 consistent with filters */}
-                <Button
-                    onClick={openAdd}
-                    className="shrink-0 bg-indigo-600 text-white shadow-sm shadow-indigo-200 hover:bg-indigo-700 active:bg-indigo-800"
-                >
-                    <span className="text-base leading-none">+</span>
-                    {addLabel}
-                </Button>
+                {/* Action buttons */}
+                <div className="flex gap-2 shrink-0">
+                    {sheet === "danhsach" && (
+                        <>
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                onChange={handleFileImport}
+                                accept=".xlsx, .xls"
+                                className="hidden"
+                            />
+                            <Button
+                                onClick={() => fileInputRef.current?.click()}
+                                className="bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 active:bg-slate-100 flex items-center gap-1.5 cursor-pointer shadow-sm"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                Import Excel
+                            </Button>
+                            <a
+                                href="/mau_import_khach_hang.xlsx"
+                                download="mau_import_khach_hang.xlsx"
+                                className="bg-white border border-slate-200 text-slate-500 hover:text-slate-700 hover:bg-slate-50 active:bg-slate-100 flex items-center justify-center h-10 px-3 rounded-xl cursor-pointer shadow-sm text-xs font-semibold gap-1"
+                                title="Tải file mẫu Excel"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                File mẫu
+                            </a>
+                        </>
+                    )}
+                    <Button
+                        onClick={openAdd}
+                        className="shrink-0 bg-indigo-600 text-white shadow-sm shadow-indigo-200 hover:bg-indigo-700 active:bg-indigo-800"
+                    >
+                        <span className="text-base leading-none">+</span>
+                        {addLabel}
+                    </Button>
+                </div>
             </div>
 
             {/* ── Statistical overview cards (only for gifts) ───────────────── */}
@@ -534,14 +652,26 @@ export function SheetCrud({ sheet, title, subtitle, addLabel, columns, rows, pri
             {/* ── Filter bar ──────────────────────────────── */}
             <Card className="px-4 py-3">
                 <div className="mb-2.5 flex items-center justify-between gap-2">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                        Bộ lọc
+                    <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                            Bộ lọc
+                            {activeFilters > 0 && (
+                                <span className="ml-1.5 inline-flex h-4 w-4 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-bold text-white">
+                                    {activeFilters}
+                                </span>
+                            )}
+                        </span>
                         {activeFilters > 0 && (
-                            <span className="ml-1.5 inline-flex h-4 w-4 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-bold text-white">
-                                {activeFilters}
-                            </span>
+                            <button
+                                type="button"
+                                onClick={clearFilters}
+                                className="text-xs font-medium text-red-600 hover:text-red-700 hover:underline cursor-pointer flex items-center gap-1 transition-colors ml-2"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                                Xóa bộ lọc
+                            </button>
                         )}
-                    </span>
+                    </div>
                     <span className="text-xs text-slate-400">
                         {filtered.length}/{items.length} bản ghi
                     </span>
@@ -612,7 +742,7 @@ export function SheetCrud({ sheet, title, subtitle, addLabel, columns, rows, pri
                                         {columnLabel(h)}
                                     </th>
                                 ))}
-                                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                <th className="whitespace-nowrap px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500 w-28">
                                     Thao tác
                                 </th>
                             </tr>
@@ -637,11 +767,16 @@ export function SheetCrud({ sheet, title, subtitle, addLabel, columns, rows, pri
                                                     ? <Badge className={statusColor(stringify(row[col]))}>{stringify(row[col])}</Badge>
                                                     : <span className="text-slate-400">—</span>
                                             ) : (
-                                                <span className="whitespace-nowrap">{formatCellValue(col, row[col]) || "—"}</span>
+                                                <span 
+                                                    className="whitespace-nowrap"
+                                                    title={(col === "email" || col === "sale" || col === "dau_moi_lien_he") && row[col] ? stringify(row[col]) : undefined}
+                                                >
+                                                    {formatCellValue(col, row[col]) || "—"}
+                                                </span>
                                             )}
                                         </td>
                                     ))}
-                                    <td className="px-4 py-3">
+                                    <td className="whitespace-nowrap px-4 py-3 w-28">
                                         <div className="flex items-center justify-end gap-1.5">
                                             {/* Edit — ghost, h-8 compact action */}
                                             <button
@@ -1373,6 +1508,7 @@ export function SheetCrud({ sheet, title, subtitle, addLabel, columns, rows, pri
                                                     value={form[col] ?? ""}
                                                     onChange={(e) => setForm((prev) => ({ ...prev, [col]: e.target.value }))}
                                                     placeholder={columnLabel(col)}
+                                                    maxLength={col === "email" ? 50 : undefined}
                                                 />
                                             )}
                                         </div>

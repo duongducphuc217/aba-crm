@@ -368,6 +368,97 @@ export async function deleteRow(
     });
 }
 
+export async function addRows(
+    sheet: SheetName,
+    dataList: Record<string, unknown>[]
+): Promise<RowRecord[]> {
+    dataCache.delete(sheet);
+    const headers = await ensureHeaders(sheet);
+    
+    // Generate sequential MA_KH for danhsach sheet
+    let nextNum = 0;
+    if (sheet === "danhsach") {
+        const currentRows = await readSheet("danhsach");
+        for (const r of currentRows) {
+            const val = String(r.MA_KH || "").trim();
+            const m = val.match(/^KH(\d+)$/);
+            if (m) { const n = parseInt(m[1], 10); if (n > nextNum) nextNum = n; }
+        }
+    }
+    
+    const rowsValues: (string | number)[][] = [];
+    const preparedDataList: Record<string, unknown>[] = [];
+    
+    for (let data of dataList) {
+        if (SHEETS[sheet].includes("ngay_cap_nhat")) {
+            data = { ...data, ngay_cap_nhat: getNowString() };
+        }
+        if (sheet === "danhsach" && !data.MA_KH) {
+            nextNum++;
+            data = { ...data, MA_KH: `KH${String(nextNum).padStart(3, "0")}` };
+        }
+        preparedDataList.push(data);
+        const values = headers.map((col) =>
+            col in data ? valueForSheet(col, data[col]) : ""
+        );
+        rowsValues.push(values);
+    }
+    
+    const appendData = await apiFetch(
+        `/values/${enc(sheet)}!A:Z:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`,
+        {
+            method: "POST",
+            body: JSON.stringify({ values: rowsValues }),
+        }
+    );
+    
+    const updatedRange: string = appendData.updates?.updatedRange || "";
+    const rangeMatch = updatedRange.match(/!A(\d+):[A-Z]+(\d+)/);
+    let startRow = 0;
+    if (rangeMatch) {
+        startRow = Number(rangeMatch[1]);
+    } else {
+        const singleMatch = updatedRange.match(/!(?:[A-Z]+)(\d+)/);
+        if (singleMatch) startRow = Number(singleMatch[1]);
+    }
+    
+    const results: RowRecord[] = [];
+    preparedDataList.forEach((data, index) => {
+        const rowNum = startRow ? startRow + index : 0;
+        const result = { _row: rowNum } as RowRecord;
+        const values = rowsValues[index];
+        SHEETS[sheet].forEach((col) => {
+            const idx = headers.indexOf(col);
+            result[col] = idx >= 0 ? cellToJson(values[idx]) : null;
+        });
+        results.push(result);
+    });
+    
+    // Auto sync main contact to daumoi tab for each customer
+    if (sheet === "danhsach") {
+        for (const data of preparedDataList) {
+            const customerId = String(data.MA_KH || "").trim();
+            const contactName = String(data.dau_moi_lien_he || "").trim();
+            if (customerId && contactName) {
+                try {
+                    await addRow("daumoi", {
+                        MA_KH: customerId,
+                        ho_ten: contactName,
+                        chuc_danh: String(data.chuc_danh || "Khác").trim(),
+                        phone: String(data.phone || "").trim(),
+                        ngay_sinh: "",
+                        ghi_chu: "Đầu mối liên hệ chính",
+                    });
+                } catch (contactErr) {
+                    console.error("Lỗi tự động thêm đầu mối liên hệ khi import:", contactErr);
+                }
+            }
+        }
+    }
+    
+    return results;
+}
+
 export async function ensureLocalReadable(): Promise<boolean> {
     try {
         await ensureHeaders("danhsach");
